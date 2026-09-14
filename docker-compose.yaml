@@ -7,6 +7,8 @@ services:
       dockerfile: usd-currency-service/Dockerfile
     ports:
       - "8090:8090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - mock-payment-network
 
@@ -17,6 +19,8 @@ services:
       dockerfile: health-pulse-service/Dockerfile
     ports:
       - "8095:8095"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - mock-payment-network
 

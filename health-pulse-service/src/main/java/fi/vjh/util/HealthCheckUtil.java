@@ -1,18 +1,16 @@
 package fi.vjh.util;
 
 import fi.vjh.domain.EndpointURL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.util.Map;
-import java.util.function.Predicate;
 
 public final class HealthCheckUtil {
 
-
+    private static final Logger LOG = LoggerFactory.getLogger(HealthCheckUtil.class);
 
     private HealthCheckUtil() {
     }
@@ -30,15 +28,9 @@ public final class HealthCheckUtil {
             connection.setReadTimeout(1500);
             return connection.getResponseCode() == 200;
         } catch (IOException e) {
+            LOG.error("Health check failed for URL {}", urlString, e);
             return false;
         }
     }
 
-    private static boolean pingDatabase(String jdbcUrl) {
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
-            return conn != null && !conn.isClosed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
 }

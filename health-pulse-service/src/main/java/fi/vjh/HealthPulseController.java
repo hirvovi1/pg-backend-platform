@@ -15,20 +15,21 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import fi.vjh.util.HealthCheckUtil;
 
 @Controller("/api/pulse")
 public class HealthPulseController {
 
     private final Map<String, EndpointURL> endpoints = Map.of(
-            "Java account api", EndpointURL.of("http://localhost:8080/accounts"),
-            "currency service", EndpointURL.of("http://localhost:8090/api/usd/convert?amountInCents=100"),
-            "H2 db (via api)", EndpointURL.of("http://localhost:8080/db/health")
+            "Java account api", EndpointURL.of("http://host.docker.internal:8080/accounts"),
+            "currency service", EndpointURL.of("http://usd-currency-service:8090/api/usd/convert?amountInCents=100"),
+            "H2 db (via api)", EndpointURL.of("http://host.docker.internal:8080/db/health")
     );
+
 
     @Get(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM)
     public Publisher<Event<Map<String, Object>>> getHealthStream() {
-
         List<String> serviceNames = new ArrayList<>(endpoints.keySet());
 
         return Flux.interval(Duration.ofSeconds(3))
@@ -50,11 +51,4 @@ public class HealthPulseController {
                 });
     }
 
-    @Options("/stream")
-    public HttpResponse<?> options() {
-        return HttpResponse.ok()
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "GET, OPTIONS")
-                .header("Access-Control-Allow-Headers", "Content-Type");
-    }
 }
