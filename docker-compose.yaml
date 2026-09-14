@@ -1,0 +1,25 @@
+
+services:
+  usd-currency-service:
+    container_name: usd-currency-service
+    build:
+      context: . # Koko ylätason juuri on kontekstina, jotta COPY-komennot toimivat
+      dockerfile: usd-currency-service/Dockerfile
+    ports:
+      - "8090:8090"
+    networks:
+      - mock-payment-network
+
+  health-pulse-service:
+    container_name: health-pulse-service
+    build:
+      context: . # Koko ylätason juuri on kontekstina, jotta COPY-komennot toimivat
+      dockerfile: health-pulse-service/Dockerfile
+    ports:
+      - "8095:8095"
+    networks:
+      - mock-payment-network
+
+networks:
+  mock-payment-network:
+    driver: bridge
