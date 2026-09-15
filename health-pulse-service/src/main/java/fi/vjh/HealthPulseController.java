@@ -22,9 +22,9 @@ import fi.vjh.util.HealthCheckUtil;
 public class HealthPulseController {
 
     private final Map<String, EndpointURL> endpoints = Map.of(
-            "Java account api", EndpointURL.of("http://host.docker.internal:8080/accounts"),
+            "Java account api", EndpointURL.of("http://pgapi:8080/accounts"),
             "currency service", EndpointURL.of("http://usd-currency-service:8090/api/usd/convert?amountInCents=100"),
-            "H2 db (via api)", EndpointURL.of("http://host.docker.internal:8080/db/health")
+            "H2 db (via api)", EndpointURL.of("http://pgapi:8080/db/health")
     );
 
 
