@@ -26,5 +26,6 @@ services:
 
 networks:
   mock-payment-network:
+    external: true
     name: mock-payment-network
     driver: bridge
