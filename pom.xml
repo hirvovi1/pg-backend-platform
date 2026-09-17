@@ -17,6 +17,8 @@
     <modules>
         <module>usd-currency-service</module>
         <module>health-pulse-service</module>
+        <module>product-service</module>
+        <module>order-service</module>
     </modules>
 
     <properties>
