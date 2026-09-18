@@ -6,6 +6,7 @@ import fi.vjh.domain.ProductStatus;
 import fi.vjh.repository.ProductRepository;
 import fi.vjh.service.OrderServicePort;
 import io.micronaut.core.type.Argument;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.HttpClient;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest(transactional = false)
+@Property(name = "micronaut.server.port", value = "-1")
 class ProductRowServiceTest {
 
     @Inject

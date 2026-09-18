@@ -4,6 +4,7 @@ import fi.vjh.domain.Order;
 import fi.vjh.domain.OrderStatus;
 import fi.vjh.repository.OrderRepository;
 import fi.vjh.repository.OrderRow;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -20,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(transactional = false)
+@Property(name = "micronaut.server.port", value = "-1")
 class OrderServiceTest {
 
     @Inject

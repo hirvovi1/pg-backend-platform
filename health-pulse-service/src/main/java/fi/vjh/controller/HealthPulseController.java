@@ -1,11 +1,10 @@
-package fi.vjh;
+package fi.vjh.controller;
 
 import fi.vjh.domain.EndpointURL;
+import fi.vjh.util.HealthCheckUtil;
+import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Options;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.sse.Event;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -15,8 +14,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import fi.vjh.util.HealthCheckUtil;
 
 @Controller("/api/pulse")
 public class HealthPulseController {
