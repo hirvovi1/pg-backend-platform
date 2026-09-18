@@ -1,23 +1,19 @@
-package fi.vjh.domain;
+package fi.vjh.repository;
 
+import fi.vjh.domain.OrderStatus;
 import io.micronaut.serde.annotation.Serdeable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "orders")
 @Serdeable
-public class Order {
+@NoArgsConstructor
+public class OrderRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long productId;
     private Integer quantity;
 

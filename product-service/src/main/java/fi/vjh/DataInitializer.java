@@ -1,6 +1,6 @@
 package fi.vjh;
 
-import fi.vjh.domain.Product;
+import fi.vjh.repository.ProductRow;
 import fi.vjh.domain.ProductStatus;
 import fi.vjh.repository.ProductRepository;
 import io.micronaut.context.event.StartupEvent;
@@ -23,7 +23,7 @@ public class DataInitializer {
     public void onStartup(StartupEvent event) {
         // Alustetaan dataa vain, jos kanta on tyhjä
         if (productRepository.count() == 0) {
-            Product p1 = new Product();
+            ProductRow p1 = new ProductRow();
             p1.setName("Koodauskahvi");
             p1.setDescription("Tumma paahto, pitää bugit loitolla.");
             p1.setPrice(new BigDecimal("12.50"));
@@ -31,7 +31,7 @@ public class DataInitializer {
             p1.setStatus(ProductStatus.ACTIVE);
             productRepository.save(p1);
 
-            Product p2 = new Product();
+            ProductRow p2 = new ProductRow();
             p2.setName("Micronaut t-paita");
             p2.setDescription("Nopeampi käynnistymisaika kuin puuvillalla yleensä.");
             p2.setPrice(new BigDecimal("25.00"));

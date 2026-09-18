@@ -9,11 +9,11 @@
     <version>0.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>product-service</artifactId>
+  <artifactId>productRow-service</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <exec.mainClass>fi.vjh.product.ProductApplication</exec.mainClass>
+    <exec.mainClass>fi.vjh.productRow.ProductApplication</exec.mainClass>
   </properties>
 
   <dependencies>
@@ -70,6 +70,11 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>fi.vjh</groupId>
+      <artifactId>shared-domain</artifactId>
+      <version>0.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -116,7 +121,7 @@
           </annotationProcessorPaths>
           <compilerArgs>
             <arg>-Amicronaut.processing.group=fi.vjh</arg>
-            <arg>-Amicronaut.processing.module=product-service</arg>
+            <arg>-Amicronaut.processing.module=productRow-service</arg>
           </compilerArgs>
         </configuration>
       </plugin>

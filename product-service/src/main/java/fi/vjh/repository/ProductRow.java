@@ -1,5 +1,6 @@
-package fi.vjh.domain;
+package fi.vjh.repository;
 
+import fi.vjh.domain.ProductStatus;
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "products")
 @Serdeable
-public class Product {
+public class ProductRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

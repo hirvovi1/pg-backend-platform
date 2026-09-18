@@ -6,7 +6,7 @@ COPY .mvn .mvn
 COPY pom.xml .
 COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
-COPY product-service product-service
+COPY productRow-service productRow-service
 COPY order-service order-service
 
 RUN ./mvnw package -pl order-service -am -DskipTests -B

@@ -1,6 +1,6 @@
 package fi.vjh;
 
-import fi.vjh.domain.Order;
+import fi.vjh.repository.OrderRow;
 import fi.vjh.domain.OrderStatus;
 import fi.vjh.repository.OrderRepository;
 import io.micronaut.context.event.StartupEvent;
@@ -21,11 +21,11 @@ public class DataInitializer {
     @Transactional
     public void onStartup(StartupEvent event) {
         if (orderRepository.count() == 0) {
-            Order order = new Order();
-            order.setProductId(1L);
-            order.setQuantity(1);
-            order.setStatus(OrderStatus.PENDING);
-            orderRepository.save(order);
+            OrderRow orderRow = new OrderRow();
+            orderRow.setProductId(1L);
+            orderRow.setQuantity(1);
+            orderRow.setStatus(OrderStatus.PENDING);
+            orderRepository.save(orderRow);
         }
     }
 }

@@ -1,5 +1,6 @@
 package fi.vjh;
 
+import fi.vjh.repository.ProductRow;
 import fi.vjh.domain.Product;
 import fi.vjh.domain.ProductStatus;
 import fi.vjh.repository.ProductRepository;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest(transactional = false)
-class ProductServiceTest {
+class ProductRowServiceTest {
 
     @Inject
     @Client("/")
@@ -49,7 +50,7 @@ class ProductServiceTest {
 
     @Test
     void getProductsReturnsOnlyActiveProducts() {
-        Product active = saveProduct("Active product", ProductStatus.ACTIVE);
+        ProductRow active = saveProduct("Active product", ProductStatus.ACTIVE);
         saveProduct("Archived product", ProductStatus.ARCHIVED);
 
         List<Product> products = client.toBlocking().retrieve(
@@ -58,8 +59,8 @@ class ProductServiceTest {
         );
 
         assertEquals(1, products.size());
-        assertEquals(active.getId(), products.get(0).getId());
-        assertEquals(ProductStatus.ACTIVE, products.get(0).getStatus());
+        assertEquals(active.getId(), products.get(0).id());
+        assertEquals(ProductStatus.ACTIVE, products.get(0).status());
     }
 
     @Test
@@ -73,23 +74,23 @@ class ProductServiceTest {
 
         assertEquals(201, response.getStatus().getCode());
         Product saved = response.body();
-        assertNotNull(saved.getId());
-        assertEquals("New product", saved.getName());
-        assertEquals(ProductStatus.ACTIVE, saved.getStatus());
+        assertNotNull(saved.id());
+        assertEquals("New product", saved.name());
+        assertEquals(ProductStatus.ACTIVE, saved.status());
     }
 
     @Test
     void getProductByIdReturnsProductWhenItExists() {
-        Product product = saveProduct("Find me", ProductStatus.ACTIVE);
+        ProductRow productRow = saveProduct("Find me", ProductStatus.ACTIVE);
 
         HttpResponse<Product> response = client.toBlocking().exchange(
-                HttpRequest.GET("/products/" + product.getId()),
+                HttpRequest.GET("/products/" + productRow.getId()),
                 Product.class
         );
 
         assertEquals(200, response.getStatus().getCode());
-        assertEquals(product.getId(), response.body().getId());
-        assertEquals("Find me", response.body().getName());
+        assertEquals(productRow.getId(), response.body().id());
+        assertEquals("Find me", response.body().name());
     }
 
     @Test
@@ -104,22 +105,22 @@ class ProductServiceTest {
 
     @Test
     void deleteProductArchivesItAndRemovesItFromActiveListing() {
-        Product product = saveProduct("Archive me", ProductStatus.ACTIVE);
+        ProductRow productRow = saveProduct("Archive me", ProductStatus.ACTIVE);
 
         HttpResponse<?> deleteResponse = client.toBlocking().exchange(
-                HttpRequest.DELETE("/products/" + product.getId()),
+                HttpRequest.DELETE("/products/" + productRow.getId()),
                 Argument.of(String.class)
         );
 
         assertEquals(204, deleteResponse.getStatus().getCode());
-        Product archived = productRepository.findById(product.getId()).orElseThrow();
+        ProductRow archived = productRepository.findById(productRow.getId()).orElseThrow();
         assertEquals(ProductStatus.ARCHIVED, archived.getStatus());
 
         List<Product> activeProducts = client.toBlocking().retrieve(
                 HttpRequest.GET("/products"),
                 Argument.listOf(Product.class)
         );
-        assertTrue(activeProducts.stream().noneMatch(item -> product.getId().equals(item.getId())));
+        assertTrue(activeProducts.stream().noneMatch(item -> productRow.getId().equals(item.id())));
     }
 
     @Test
@@ -134,16 +135,16 @@ class ProductServiceTest {
 
     @Test
     void deleteProductWithPendingOrderReturnsConflictAndKeepsItActive() {
-        Product product = saveProduct("Order pending", ProductStatus.ACTIVE);
+        ProductRow productRow = saveProduct("Order pending", ProductStatus.ACTIVE);
         orderServicePort.setProductHasOpenOrders(true);
 
         HttpClientResponseException exception = assertThrows(
                 HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(HttpRequest.DELETE("/products/" + product.getId()))
+                () -> client.toBlocking().exchange(HttpRequest.DELETE("/products/" + productRow.getId()))
         );
 
         assertEquals(409, exception.getStatus().getCode());
-        Product unchanged = productRepository.findById(product.getId()).orElseThrow();
+        ProductRow unchanged = productRepository.findById(productRow.getId()).orElseThrow();
         assertEquals(ProductStatus.ACTIVE, unchanged.getStatus());
     }
 
@@ -152,11 +153,11 @@ class ProductServiceTest {
     void dataInitializerSeedsProductsWhenRepositoryIsEmpty() {
         dataInitializer.onStartup(null);
 
-        List<Product> products = productRepository.findAll();
+        List<ProductRow> productRows = productRepository.findAll();
 
-        assertEquals(2, products.size());
-        Product coffee = products.stream()
-                .filter(product -> "Koodauskahvi".equals(product.getName()))
+        assertEquals(2, productRows.size());
+        ProductRow coffee = productRows.stream()
+                .filter(productRow -> "Koodauskahvi".equals(productRow.getName()))
                 .findFirst()
                 .orElseThrow();
         assertEquals("Tumma paahto, pitää bugit loitolla.", coffee.getDescription());
@@ -164,8 +165,8 @@ class ProductServiceTest {
         assertEquals("https://example.com", coffee.getImageUrl());
         assertEquals(ProductStatus.ACTIVE, coffee.getStatus());
 
-        Product shirt = products.stream()
-                .filter(product -> "Micronaut t-paita".equals(product.getName()))
+        ProductRow shirt = productRows.stream()
+                .filter(productRow -> "Micronaut t-paita".equals(productRow.getName()))
                 .findFirst()
                 .orElseThrow();
         assertEquals("Nopeampi käynnistymisaika kuin puuvillalla yleensä.", shirt.getDescription());
@@ -176,30 +177,41 @@ class ProductServiceTest {
 
     @Test
     void dataInitializerDoesNotAddProductsWhenRepositoryIsNotEmpty() {
-        Product existing = saveProduct("Existing product", ProductStatus.ARCHIVED);
+        ProductRow existing = saveProduct("Existing product", ProductStatus.ARCHIVED);
 
         dataInitializer.onStartup(null);
 
-        List<Product> products = productRepository.findAll();
+        List<ProductRow> productRows = productRepository.findAll();
 
-        assertEquals(1, products.size());
-        assertEquals(existing.getId(), products.get(0).getId());
-        assertEquals("Existing product", products.get(0).getName());
-        assertEquals(ProductStatus.ARCHIVED, products.get(0).getStatus());
+        assertEquals(1, productRows.size());
+        assertEquals(existing.getId(), productRows.get(0).getId());
+        assertEquals("Existing product", productRows.get(0).getName());
+        assertEquals(ProductStatus.ARCHIVED, productRows.get(0).getStatus());
     }
 
-    private Product saveProduct(String name, ProductStatus status) {
-        return productRepository.save(product(name, status));
+    private ProductRow saveProduct(String name, ProductStatus status) {
+        return productRepository.save(productRow(name, status));
     }
 
     private Product product(String name, ProductStatus status) {
-        Product product = new Product();
-        product.setName(name);
-        product.setDescription("Test description");
-        product.setPrice(new BigDecimal("10.00"));
-        product.setImageUrl("https://example.com/product");
-        product.setStatus(status);
-        return product;
+        return new Product(
+                null,
+                name,
+                "Test description",
+                new BigDecimal("10.00"),
+                "https://example.com/product",
+                status
+        );
+    }
+
+    private ProductRow productRow(String name, ProductStatus status) {
+        ProductRow productRow = new ProductRow();
+        productRow.setName(name);
+        productRow.setDescription("Test description");
+        productRow.setPrice(new BigDecimal("10.00"));
+        productRow.setImageUrl("https://example.com/product");
+        productRow.setStatus(status);
+        return productRow;
     }
 
     @Singleton
