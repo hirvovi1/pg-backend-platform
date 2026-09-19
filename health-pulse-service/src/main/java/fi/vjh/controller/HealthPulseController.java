@@ -21,6 +21,8 @@ public class HealthPulseController {
     private final Map<String, EndpointURL> endpoints = Map.of(
             "Java account api", EndpointURL.of("http://pgapi:8080/accounts"),
             "currency service", EndpointURL.of("http://usd-currency-service:8090/api/usd/convert?amountInCents=100"),
+            "product service", EndpointURL.of("http://product-service:8082/products"),
+            "order service", EndpointURL.of("http://order-service:8083/orders"),
             "H2 db (via api)", EndpointURL.of("http://pgapi:8080/db/health")
     );
 

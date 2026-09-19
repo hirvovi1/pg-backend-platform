@@ -4,9 +4,10 @@ WORKDIR /home/app
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
+COPY shared-domain shared-domain
 COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
-COPY productRow-service productRow-service
+COPY product-service product-service
 COPY order-service order-service
 
 RUN ./mvnw package -pl order-service -am -DskipTests -B

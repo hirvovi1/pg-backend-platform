@@ -8,8 +8,11 @@ COPY .mvn .mvn
 COPY pom.xml .
 
 # Kopioidaan molemmat moduulikansiot kokonaisuudessaan
+COPY shared-domain shared-domain
 COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
+COPY product-service product-service
+COPY order-service order-service
 
 # Ajetaan käännös vain terveyspulssille monorepo-lipuilla
 RUN ./mvnw package -pl health-pulse-service -am -DskipTests -B

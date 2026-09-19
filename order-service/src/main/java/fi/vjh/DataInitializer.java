@@ -7,15 +7,13 @@ import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Singleton
+@RequiredArgsConstructor
 public class DataInitializer {
 
     private final OrderRepository orderRepository;
-
-    public DataInitializer(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
 
     @EventListener
     @Transactional

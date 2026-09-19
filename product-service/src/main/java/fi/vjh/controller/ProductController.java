@@ -10,19 +10,16 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Controller("/products")
 @ExecuteOn(TaskExecutors.BLOCKING)
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductRepository productRepository;
     private final OrderServicePort orderServicePort;
-
-    public ProductController(ProductRepository productRepository, OrderServicePort orderServicePort) {
-        this.productRepository = productRepository;
-        this.orderServicePort = orderServicePort;
-    }
 
     @Get
     public List<Product> getAllActiveProducts() {

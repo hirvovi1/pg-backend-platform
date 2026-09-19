@@ -7,16 +7,14 @@ import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @Singleton
+@RequiredArgsConstructor
 public class DataInitializer {
 
     private final ProductRepository productRepository;
-
-    public DataInitializer(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
 
     @EventListener
     @Transactional

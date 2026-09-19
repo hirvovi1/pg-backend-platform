@@ -1,35 +1,32 @@
 package fi.vjh;
 
-import fi.vjh.repository.ProductRow;
 import fi.vjh.domain.Product;
 import fi.vjh.domain.ProductStatus;
 import fi.vjh.repository.ProductRepository;
+import fi.vjh.repository.ProductRow;
 import fi.vjh.service.OrderServicePort;
-import io.micronaut.core.type.Argument;
 import io.micronaut.context.annotation.Property;
+import io.micronaut.context.annotation.Replaces;
+import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.context.annotation.Replaces;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import jakarta.inject.Singleton;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest(transactional = false)
 @Property(name = "micronaut.server.port", value = "-1")
-class ProductRowServiceTest {
+class ProductServiceTest {
 
     @Inject
     @Client("/")

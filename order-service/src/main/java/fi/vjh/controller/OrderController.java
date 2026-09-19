@@ -7,17 +7,15 @@ import fi.vjh.repository.OrderRow;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Controller("/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderRepository orderRepository;
-
-    public OrderController(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
 
     @Get
     public List<Order> getAllOrders() {

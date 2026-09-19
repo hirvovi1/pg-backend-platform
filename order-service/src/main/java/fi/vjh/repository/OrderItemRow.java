@@ -2,6 +2,7 @@ package fi.vjh.repository;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 @Table(name = "order_items")
 @Getter
 @Setter
+@NoArgsConstructor
 public class OrderItemRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
