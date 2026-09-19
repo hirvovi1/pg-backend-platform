@@ -103,6 +103,16 @@ class ProductServiceTest {
     }
 
     @Test
+    void getProductByIdRejectsNonNumericId() {
+        HttpClientResponseException exception = assertThrows(
+                HttpClientResponseException.class,
+                () -> client.toBlocking().retrieve(HttpRequest.GET("/products/not-a-number"))
+        );
+
+        assertEquals(400, exception.getStatus().getCode());
+    }
+
+    @Test
     void deleteProductArchivesItAndRemovesItFromActiveListing() {
         ProductRow productRow = saveProduct("Archive me", ProductStatus.ACTIVE);
 

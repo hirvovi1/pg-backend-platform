@@ -114,6 +114,21 @@ class OrderServiceTest {
     }
 
     @Test
+    void createOrderWithInvalidStatusReturnsServerError() {
+        Order request = new Order(null, 11L, 3, "INVALID");
+
+        HttpClientResponseException exception = assertThrows(
+                HttpClientResponseException.class,
+                () -> client.toBlocking().exchange(
+                        HttpRequest.POST("/orders", request),
+                        Order.class
+                )
+        );
+
+        assertEquals(500, exception.getStatus().getCode());
+    }
+
+    @Test
     void cancelOrderChangesStatusToCancelled() {
         OrderRow orderRow = saveOrder(12L, 1, OrderStatus.PENDING);
 

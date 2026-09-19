@@ -8,7 +8,7 @@
     <parent>
         <groupId>fi.vjh</groupId>
         <artifactId>pg-backend-platform</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -20,6 +20,16 @@
             <groupId>io.micronaut.serde</groupId>
             <artifactId>micronaut-serde-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -2,6 +2,7 @@ package fi.vjh;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpRequest;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -30,5 +31,27 @@ class CurrencyControllerTest {
         assertEquals("USD", response.get("currency"));
         assertEquals(1.08, response.get("exchangeRate"));
         assertEquals("10.80", response.get("convertedAmount"));
+    }
+
+    @Test
+    void convertToUsdRejectsMissingAmount() {
+        HttpClientResponseException exception = assertThrows(
+                HttpClientResponseException.class,
+                () -> client.toBlocking().retrieve(HttpRequest.GET("/api/usd/convert"))
+        );
+
+        assertEquals(400, exception.getStatus().getCode());
+    }
+
+    @Test
+    void convertToUsdRejectsNonNumericAmount() {
+        HttpClientResponseException exception = assertThrows(
+                HttpClientResponseException.class,
+                () -> client.toBlocking().retrieve(
+                        HttpRequest.GET("/api/usd/convert?amountInCents=invalid")
+                )
+        );
+
+        assertEquals(400, exception.getStatus().getCode());
     }
 }
