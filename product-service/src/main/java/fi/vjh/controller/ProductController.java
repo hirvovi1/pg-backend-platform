@@ -10,7 +10,12 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.StartupEvent;
+import io.micronaut.runtime.event.annotation.EventListener;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @Controller("/products")
@@ -18,8 +23,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProductController.class);
+
     private final ProductRepository productRepository;
     private final OrderServicePort orderServicePort;
+    @Value("${app.version}")
+    private String version;
+
+    @EventListener
+    public void onEvent(StartupEvent event) {
+        LOG.info("Product service version {}", version);
+    }
 
     @Get
     public List<Product> getAllActiveProducts() {
