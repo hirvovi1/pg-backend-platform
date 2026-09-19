@@ -18,4 +18,9 @@ public record Order(
     public Order(Long id, Long productId, Integer quantity, String status) {
         this(id, productId, null, quantity, status, List.of());
     }
+
+    public static Order from(Order order, Date orderPlaced) {
+        return new Order(order.id, order.productId, orderPlaced, order.quantity, order.status, order.items);
+    }
+
 }
