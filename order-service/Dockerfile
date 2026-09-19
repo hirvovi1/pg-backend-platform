@@ -8,6 +8,7 @@ COPY shared-domain shared-domain
 COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
 COPY product-service product-service
+COPY facade facade
 COPY order-service order-service
 
 RUN ./mvnw package -pl order-service -am -DskipTests -B

@@ -13,6 +13,7 @@ COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
 COPY product-service product-service
 COPY order-service order-service
+COPY facade facade
 
 # Ajetaan käännös vain terveyspulssille monorepo-lipuilla
 RUN ./mvnw package -pl health-pulse-service -am -DskipTests -B

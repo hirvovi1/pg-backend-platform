@@ -20,6 +20,7 @@
         <module>product-service</module>
         <module>order-service</module>
         <module>shared-domain</module>
+        <module>facade</module>
     </modules>
 
     <properties>
@@ -48,6 +49,10 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>io.micronaut.maven</groupId>
+                <artifactId>micronaut-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

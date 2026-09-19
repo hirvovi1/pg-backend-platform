@@ -1,5 +1,17 @@
 
 services:
+  pg-api-facade:
+    container_name: pg-api-facade
+    build:
+      context: .
+      dockerfile: facade/Dockerfile
+    ports:
+      - "8091:8091"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mock-payment-network
+
   usd-currency-service:
     container_name: usd-currency-service
     build:
