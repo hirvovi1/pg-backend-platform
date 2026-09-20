@@ -1,5 +1,6 @@
-package fi.vjh.facade;
+package fi.vjh.facade.impl;
 
+import fi.vjh.facade.CurrencyServiceClient;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;
