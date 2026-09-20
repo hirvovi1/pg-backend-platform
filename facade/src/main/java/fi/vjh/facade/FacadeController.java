@@ -2,22 +2,22 @@ package fi.vjh.facade;
 
 import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.StartupEvent;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Body;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Delete;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.annotation.Put;
-import io.micronaut.http.annotation.QueryValue;
-import io.micronaut.serde.annotation.Serdeable;
+import io.micronaut.http.annotation.*;
+import io.micronaut.http.sse.Event;
+import io.micronaut.runtime.event.annotation.EventListener;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
-import io.micronaut.http.sse.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
 
@@ -37,10 +37,20 @@ import java.util.Map;
 @ExecuteOn(TaskExecutors.BLOCKING)
 public class FacadeController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FacadeController.class);
+
     private final OrderServiceClient orderService;
     private final ProductServiceClient productService;
     private final CurrencyServiceClient currencyService;
     private final HealthPulseServiceClient healthPulseService;
+    @Value("${app.version}")
+    private String version;
+
+    @EventListener
+    public void onEvent(StartupEvent event) {
+        LOG.info("Facade api version {}", version);
+    }
+
 
     @Get("/products")
     public List<Product> getProducts() {
