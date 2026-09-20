@@ -73,7 +73,7 @@
     <dependency>
       <groupId>fi.vjh</groupId>
       <artifactId>shared-domain</artifactId>
-      <version>0.3</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
