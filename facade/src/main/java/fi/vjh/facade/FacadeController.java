@@ -13,6 +13,8 @@ import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.serde.annotation.Serdeable;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
 import io.micronaut.http.sse.Event;
@@ -22,6 +24,13 @@ import java.util.Map;
 /**
  * Frontend-facing facade that delegates requests to the backend services.
  */
+@OpenAPIDefinition(
+        info = @Info(
+                title = "PG API platform",
+                version = "${api.version}",
+                description = "Julkinen rajapintakerros (Facade)"
+        )
+)
 @Controller("/api/v1/frontend")
 @Serdeable
 @RequiredArgsConstructor

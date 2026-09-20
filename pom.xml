@@ -39,6 +39,12 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.micronaut.openapi</groupId>
+            <artifactId>micronaut-openapi-annotations</artifactId>
+            <version>${micronaut.openapi.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -56,7 +62,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+
                 <configuration>
+                    <compilerArgs>
+                        <arg>-Amicronaut.openapi.expand.api.version=${project.version}</arg>
+                    </compilerArgs>
                     <annotationProcessorPaths combine.self="override">
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -82,6 +92,11 @@
                             <groupId>io.micronaut.data</groupId>
                             <artifactId>micronaut-data-processor</artifactId>
                             <version>${micronaut.data.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.micronaut.openapi</groupId>
+                            <artifactId>micronaut-openapi</artifactId>
+                            <version>${micronaut.openapi.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

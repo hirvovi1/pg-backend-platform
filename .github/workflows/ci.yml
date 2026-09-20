@@ -36,5 +36,21 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x mvnw
 
+      # Ajetaan testit ja kääntö (generoi YAML-tiedoston facade-moduuliin)
       - name: Run tests
         run: ./mvnw --batch-mode --no-transfer-progress test
+
+      - name: Install Redoc CLI
+        run: npm install -g @redocly/cli
+
+      # Generoidaan HTML suoraan facaden target-kansiosta ilman etsintäsilmukoita
+      - name: Generate HTML API Docs
+        run: |
+          mkdir -p api-docs
+          redocly build-docs facade/target/classes/META-INF/swagger/*.yml -o api-docs/api-dokumentaatio.html
+
+      - name: Upload API Docs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation
+          path: api-docs/api-dokumentaatio.html
