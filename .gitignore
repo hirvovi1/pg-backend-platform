@@ -19,3 +19,4 @@ out/
 /links/orderService.ts
 /links/paytrailservice.ts
 /links/productService.ts
+/cleanup.patch
