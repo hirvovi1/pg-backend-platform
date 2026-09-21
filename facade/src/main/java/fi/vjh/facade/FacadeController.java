@@ -4,7 +4,6 @@ import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.StartupEvent;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.runtime.event.annotation.EventListener;
 import io.micronaut.scheduling.TaskExecutors;
