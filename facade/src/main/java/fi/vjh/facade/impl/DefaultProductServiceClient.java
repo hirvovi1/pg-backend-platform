@@ -1,6 +1,7 @@
-package fi.vjh.facade;
+package fi.vjh.facade.impl;
 
 import fi.vjh.domain.Product;
+import fi.vjh.facade.ProductServiceClient;
 import io.micronaut.core.type.Argument;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;

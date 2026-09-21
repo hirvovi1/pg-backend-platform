@@ -51,7 +51,6 @@ public class FacadeController {
         LOG.info("Facade api version {}", version);
     }
 
-
     @Get("/products")
     public List<Product> getProducts() {
         return productService.getProducts();

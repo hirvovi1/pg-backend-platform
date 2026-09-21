@@ -14,3 +14,8 @@ out/
 .classpath
 .factorypath
 /api-dokumentaatio.html
+/links/currencyService.ts
+/links/healthPulseService.ts
+/links/orderService.ts
+/links/paytrailservice.ts
+/links/productService.ts
