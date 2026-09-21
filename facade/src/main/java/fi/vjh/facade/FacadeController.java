@@ -6,7 +6,6 @@ import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.StartupEvent;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
-import io.micronaut.http.sse.Event;
 import io.micronaut.runtime.event.annotation.EventListener;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
@@ -14,7 +13,6 @@ import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import lombok.RequiredArgsConstructor;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,6 @@ public class FacadeController {
     private final OrderServiceClient orderService;
     private final ProductServiceClient productService;
     private final CurrencyServiceClient currencyService;
-    private final HealthPulseServiceClient healthPulseService;
     @Value("${app.version}")
     private String version;
 
@@ -109,10 +106,5 @@ public class FacadeController {
     @Get("/currency/convert")
     public Map<String, Object> convertToUsd(@QueryValue double amountInCents) {
         return currencyService.convertToUsd(amountInCents);
-    }
-
-    @Get(value = "/health/stream", produces = MediaType.TEXT_EVENT_STREAM)
-    public Publisher<Event<Map<String, Object>>> getHealthStream() {
-        return healthPulseService.getHealthStream();
     }
 }

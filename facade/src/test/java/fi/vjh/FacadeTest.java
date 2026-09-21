@@ -4,7 +4,6 @@ import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
 import fi.vjh.domain.ProductStatus;
 import fi.vjh.facade.CurrencyServiceClient;
-import fi.vjh.facade.HealthPulseServiceClient;
 import fi.vjh.facade.OrderServiceClient;
 import fi.vjh.facade.ProductServiceClient;
 import io.micronaut.context.annotation.Factory;
@@ -14,12 +13,10 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
-import io.micronaut.http.sse.Event;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -171,12 +168,6 @@ class FacadeTest {
                     "currency", "USD",
                     "convertedAmount", "1.08"
             );
-        }
-
-        @Singleton
-        @Replaces(HealthPulseServiceClient.class)
-        HealthPulseServiceClient healthPulseServiceClient() {
-            return () -> Flux.just(Event.of(Map.of("status", "OK")));
         }
     }
 }

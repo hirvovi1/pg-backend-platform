@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 8095
+ */
 @Controller("/api/pulse")
 public class HealthPulseController {
 
@@ -44,6 +47,7 @@ public class HealthPulseController {
     @Get(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM)
     public Publisher<Event<Map<String, Object>>> getHealthStream() {
         List<String> serviceNames = new ArrayList<>(endpoints.keySet());
+        LOG.info("HEALT PULSE called. registered services: {}", serviceNames);
 
         return Flux.interval(Duration.ofSeconds(3))
                 .publishOn(Schedulers.boundedElastic())
