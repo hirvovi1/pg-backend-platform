@@ -1,0 +1,29 @@
+package fi.vjh.repository;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "cart_items")
+@Getter
+@Setter
+@NoArgsConstructor
+public class CartItemRow {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = false)
+    private CartRow cart;
+
+    private Long productId;
+    private int quantity;
+
+    private BigDecimal priceAtPurchase;
+
+}

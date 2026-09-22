@@ -21,6 +21,7 @@ public final class HealthCheckUtil {
 
     private static boolean pingHttp(String urlString) {
         try {
+            LOG.debug("Pinging URL {}", urlString);
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");

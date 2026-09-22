@@ -1,0 +1,23 @@
+micronaut:
+  application:
+    name: product-service
+  server:
+    port: 8082 # Portti 8082, jotta ei mene päällekkäin Springin tai muiden kanssa
+
+order-service:
+  url: http://order-service:8083
+
+datasources:
+  default:
+    url: jdbc:h2:mem:productdb;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+
+jpa:
+  default:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update # Luo taulut automaattisesti entiteetin perusteella
+        show_sql: true

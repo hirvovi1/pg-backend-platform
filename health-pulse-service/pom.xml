@@ -7,7 +7,7 @@
     <parent>
         <groupId>fi.vjh</groupId>
         <artifactId>pg-backend-platform</artifactId>
-        <version>0.1</version>
+        <version>0.9</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,10 +43,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Reactive Programming asynkronista looppia varten -->
+        <!-- Reactive Programming -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micronaut.reactor</groupId>
+            <artifactId>micronaut-reactor</artifactId>
         </dependency>
 
         <!-- Testi-riippuvuudet -->

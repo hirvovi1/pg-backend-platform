@@ -1,9 +1,21 @@
 
 services:
+  pg-api-facade:
+    container_name: pg-api-facade
+    build:
+      context: .
+      dockerfile: pg-api-facade/Dockerfile
+    ports:
+      - "8091:8091"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mock-payment-network
+
   usd-currency-service:
     container_name: usd-currency-service
     build:
-      context: . # Koko ylätason juuri on kontekstina, jotta COPY-komennot toimivat
+      context: .
       dockerfile: usd-currency-service/Dockerfile
     ports:
       - "8090:8090"
@@ -15,7 +27,7 @@ services:
   health-pulse-service:
     container_name: health-pulse-service
     build:
-      context: . # Koko ylätason juuri on kontekstina, jotta COPY-komennot toimivat
+      context: .
       dockerfile: health-pulse-service/Dockerfile
     ports:
       - "8095:8095"
@@ -24,7 +36,46 @@ services:
     networks:
       - mock-payment-network
 
+  product-service:
+    container_name: product-service
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    depends_on:
+      - order-service
+    ports:
+      - "8082:8082"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mock-payment-network
+
+  order-service:
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    ports:
+      - "8083:8083"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mock-payment-network
+
+  cart-service:
+    container_name: cart-service
+    build:
+      context: .
+      dockerfile: cart-service/Dockerfile
+    ports:
+      - "8084:8084"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mock-payment-network
+
 networks:
   mock-payment-network:
+    external: true
     name: mock-payment-network
     driver: bridge
