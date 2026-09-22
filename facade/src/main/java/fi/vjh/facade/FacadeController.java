@@ -1,5 +1,6 @@
 package fi.vjh.facade;
 
+import fi.vjh.domain.Cart;
 import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
 import io.micronaut.context.annotation.Value;
@@ -37,6 +38,7 @@ public class FacadeController {
     private static final Logger LOG = LoggerFactory.getLogger(FacadeController.class);
 
     private final OrderServiceClient orderService;
+    private final CartServiceClient cartService;
     private final ProductServiceClient productService;
     private final CurrencyServiceClient currencyService;
     @Value("${app.version}")
@@ -100,6 +102,41 @@ public class FacadeController {
     @Put("/orders/{id}/pay")
     public Order payOrder(Long id) {
         return orderService.payOrder(id);
+    }
+
+    @Get("/carts")
+    public List<Cart> getCarts() {
+        return cartService.getCarts();
+    }
+
+    @Get("/carts/product/{productId}")
+    public List<Cart> getCartsForProduct(Long productId) {
+        return cartService.getCartsForProduct(productId);
+    }
+
+    @Get("/carts/product/{productId}/has-open-carts")
+    public boolean productHasOpenCarts(Long productId) {
+        return cartService.productHasOpenCarts(productId);
+    }
+
+    @Get("/carts/{id}")
+    public Cart getCartById(Long id) {
+        return cartService.getCartById(id);
+    }
+
+    @Post("/carts")
+    public Cart addCart(@Body Cart cart) {
+        return cartService.addCart(cart);
+    }
+
+    @Put("/carts/{id}/cancel")
+    public Cart cancelCart(Long id) {
+        return cartService.cancelCart(id);
+    }
+
+    @Put("/carts/{id}/pay")
+    public Cart payCart(Long id) {
+        return cartService.payCart(id);
     }
 
     @Get("/currency/convert")

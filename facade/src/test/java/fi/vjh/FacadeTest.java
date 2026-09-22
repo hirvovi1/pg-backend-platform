@@ -1,8 +1,10 @@
 package fi.vjh;
 
+import fi.vjh.domain.Cart;
 import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
 import fi.vjh.domain.ProductStatus;
+import fi.vjh.facade.CartServiceClient;
 import fi.vjh.facade.CurrencyServiceClient;
 import fi.vjh.facade.OrderServiceClient;
 import fi.vjh.facade.ProductServiceClient;
@@ -78,6 +80,33 @@ class FacadeTest {
     void delegatesProductOpenOrderCheck() {
         var response = client.toBlocking().exchange(
                 HttpRequest.GET("/api/v1/frontend/orders/product/1/has-open-orders"),
+                String.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals("true", response.body());
+    }
+
+    @Test
+    void delegatesCartCreation() {
+        var cart = new Cart(8L, 1L, 2, "PENDING");
+        var response = client.toBlocking().exchange(
+                HttpRequest.POST("/api/v1/frontend/carts", cart)
+                        .contentType(MediaType.APPLICATION_JSON),
+                String.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatus());
+        assertEquals(
+                "{\"id\":8,\"productId\":1,\"quantity\":2,\"status\":\"PENDING\"}",
+                response.body()
+        );
+    }
+
+    @Test
+    void delegatesProductOpenCartCheck() {
+        var response = client.toBlocking().exchange(
+                HttpRequest.GET("/api/v1/frontend/carts/product/1/has-open-carts"),
                 String.class
         );
 
@@ -168,6 +197,47 @@ class FacadeTest {
                     "currency", "USD",
                     "convertedAmount", "1.08"
             );
+        }
+
+        @Singleton
+        @Replaces(CartServiceClient.class)
+        CartServiceClient cartServiceClient() {
+            return new CartServiceClient() {
+                @Override
+                public List<Cart> getCarts() {
+                    return List.of();
+                }
+
+                @Override
+                public List<Cart> getCartsForProduct(Long productId) {
+                    return List.of();
+                }
+
+                @Override
+                public boolean productHasOpenCarts(Long productId) {
+                    return true;
+                }
+
+                @Override
+                public Cart getCartById(Long id) {
+                    return new Cart(id, 1L, 2, "PENDING");
+                }
+
+                @Override
+                public Cart addCart(Cart cart) {
+                    return cart;
+                }
+
+                @Override
+                public Cart cancelCart(Long id) {
+                    return new Cart(id, 1L, 2, "CANCELLED");
+                }
+
+                @Override
+                public Cart payCart(Long id) {
+                    return new Cart(id, 1L, 2, "CONFIRMED");
+                }
+            };
         }
     }
 }
