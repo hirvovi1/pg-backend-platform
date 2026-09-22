@@ -1,0 +1,1 @@
+npx @redocly/cli@v1-archive build-docs pg-api-facade/target/classes/META-INF/swagger/*.yml -o api-docs/api-dokumentaatio.html

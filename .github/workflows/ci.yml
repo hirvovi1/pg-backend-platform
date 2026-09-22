@@ -44,7 +44,7 @@ jobs:
         run: ./mvnw --batch-mode --no-transfer-progress test
 
       - name: Install Redoc CLI
-        run: npm install -g @redocly/cli
+        run: npm install -g @redocly/cli@v1-archive
 
       # Generoidaan HTML suoraan facaden target-kansiosta ilman etsintäsilmukoita
       - name: Generate HTML API Docs
