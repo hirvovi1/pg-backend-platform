@@ -13,7 +13,8 @@ COPY usd-currency-service usd-currency-service
 COPY health-pulse-service health-pulse-service
 COPY order-service order-service
 COPY product-service product-service
-COPY facade facade
+COPY pg-api-facade pg-api-facade
+COPY cart-service cart-service
 
 # Build only the productRow service and its parent.
 RUN ./mvnw package -pl product-service -am -DskipTests -B

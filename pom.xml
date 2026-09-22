@@ -21,7 +21,7 @@
         <module>order-service</module>
         <module>cart-service</module>
         <module>shared-domain</module>
-        <module>facade</module>
+        <module>pg-api-facade</module>
     </modules>
 
     <properties>
