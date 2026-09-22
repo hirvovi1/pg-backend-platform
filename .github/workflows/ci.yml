@@ -50,7 +50,7 @@ jobs:
       - name: Generate HTML API Docs
         run: |
           mkdir -p api-docs
-          redocly build-docs facade/target/classes/META-INF/swagger/*.yml -o api-docs/api-dokumentaatio.html
+          redocly build-docs pg-api-facade/target/classes/META-INF/swagger/*.yml -o api-docs/api-dokumentaatio.html
 
       - name: Upload API Docs Artifact
         uses: actions/upload-artifact@v4
