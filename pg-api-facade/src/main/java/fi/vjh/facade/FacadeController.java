@@ -125,8 +125,8 @@ public class FacadeController {
     }
 
     @Post("/carts")
-    public Cart addCart(@Body Cart cart) {
-        return cartService.addCart(cart);
+    public Cart saveCart(@Body Cart cart) {
+        return cartService.saveCart(cart);
     }
 
     @Put("/carts/{id}/cancel")
@@ -139,8 +139,14 @@ public class FacadeController {
         return cartService.payCart(id);
     }
 
+    @Post("/carts/create")
+    public Cart createCart() {
+        return cartService.create();
+    }
+
     @Get("/currency/convert")
     public Map<String, Object> convertToUsd(@QueryValue double amountInCents) {
         return currencyService.convertToUsd(amountInCents);
     }
+
 }

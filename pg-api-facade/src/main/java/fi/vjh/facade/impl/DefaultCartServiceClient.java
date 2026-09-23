@@ -46,7 +46,7 @@ public class DefaultCartServiceClient implements CartServiceClient {
     }
 
     @Override
-    public Cart addCart(Cart cart) {
+    public Cart saveCart(Cart cart) {
         return client.toBlocking().retrieve(HttpRequest.POST("/carts", cart), Cart.class);
     }
 
@@ -58,5 +58,10 @@ public class DefaultCartServiceClient implements CartServiceClient {
     @Override
     public Cart payCart(Long id) {
         return client.toBlocking().retrieve(HttpRequest.PUT("/carts/" + id + "/pay", ""), Cart.class);
+    }
+
+    @Override
+    public Cart create() {
+        return client.toBlocking().retrieve(HttpRequest.POST("/carts/create", ""), Cart.class);
     }
 }

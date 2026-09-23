@@ -44,9 +44,15 @@ public class CartController {
 
     @Get("/product/{productId}")
     public List<Cart> getCartsForProduct(Long productId) {
-        return cartRepository.findByProductId(productId).stream()
+        return cartRepository.findByItemsProductId(productId).stream()
                 .map(this::convertToCart)
                 .toList();
+    }
+
+    @Post("/create")
+    public HttpResponse<Cart> createCart() {
+        CartRow cart = cartRepository.save(new CartRow());
+        return HttpResponse.created(convertToCart(cart));
     }
 
     @Get("/{id}")
@@ -58,7 +64,7 @@ public class CartController {
     }
 
     @Post
-    public HttpResponse<Cart> addCart(@Body Cart cart) {
+    public HttpResponse<Cart> saveCart(@Body Cart cart) {
         final CartRow cartRow;
         try {
             cartRow = convertToCartRow(cart);
@@ -95,7 +101,7 @@ public class CartController {
 
     @Get("/product/{productId}/has-open-carts")
     public HttpResponse<Boolean> productHasOpenCarts(Long productId) {
-        boolean hasOpenCarts = !cartRepository.findByProductIdAndStatusIn(
+        boolean hasOpenCarts = !cartRepository.findByItemsProductIdAndStatusIn(
                 productId,
                 List.of(CartStatus.PENDING, CartStatus.CONFIRMED)
         ).isEmpty();
@@ -105,7 +111,6 @@ public class CartController {
     private Cart convertToCart(CartRow row) {
         return new Cart(
                 row.getId(),
-                row.getProductId(),
                 row.getCartCreated(),
                 row.getQuantity(),
                 row.getStatus().name(),
@@ -116,7 +121,6 @@ public class CartController {
     private CartRow convertToCartRow(Cart cart) {
         CartRow row = new CartRow();
         row.setId(cart.id());
-        row.setProductId(cart.productId());
         row.setQuantity(cart.quantity());
         row.setCartCreated(cart.cartCreated());
         row.setStatus(CartStatus.valueOf(cart.status()));

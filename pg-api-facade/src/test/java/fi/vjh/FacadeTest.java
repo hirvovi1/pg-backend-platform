@@ -9,6 +9,7 @@ import fi.vjh.facade.CurrencyServiceClient;
 import fi.vjh.facade.OrderServiceClient;
 import fi.vjh.facade.ProductServiceClient;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
@@ -27,7 +28,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@MicronautTest
+@MicronautTest(transactional = false)
+@Property(name = "micronaut.server.port", value = "-1")
 class FacadeTest {
 
     @Inject
@@ -89,7 +91,7 @@ class FacadeTest {
 
     @Test
     void delegatesCartCreation() {
-        var cart = new Cart(8L, 1L, 2, "PENDING");
+        var cart = new Cart(8L, 2, "PENDING");
         var response = client.toBlocking().exchange(
                 HttpRequest.POST("/api/v1/frontend/carts", cart)
                         .contentType(MediaType.APPLICATION_JSON),
@@ -98,7 +100,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":8,\"productId\":1,\"quantity\":2,\"status\":\"PENDING\"}",
+                "{\"id\":8,\"quantity\":2,\"status\":\"PENDING\"}",
                 response.body()
         );
     }
@@ -116,6 +118,8 @@ class FacadeTest {
 
     @Factory
     static class DownstreamClientMocks {
+
+        private final static Cart cart = new Cart(1L, 1, "STATUS");
 
         @Singleton
         @Replaces(ProductServiceClient.class)
@@ -220,22 +224,27 @@ class FacadeTest {
 
                 @Override
                 public Cart getCartById(Long id) {
-                    return new Cart(id, 1L, 2, "PENDING");
+                    return new Cart(id, 2, "PENDING");
                 }
 
                 @Override
-                public Cart addCart(Cart cart) {
+                public Cart saveCart(Cart cart) {
                     return cart;
                 }
 
                 @Override
                 public Cart cancelCart(Long id) {
-                    return new Cart(id, 1L, 2, "CANCELLED");
+                    return new Cart(id, 2, "CANCELLED");
                 }
 
                 @Override
                 public Cart payCart(Long id) {
-                    return new Cart(id, 1L, 2, "CONFIRMED");
+                    return new Cart(id, 2, "CONFIRMED");
+                }
+
+                @Override
+                public Cart create() {
+                    return cart;
                 }
             };
         }
