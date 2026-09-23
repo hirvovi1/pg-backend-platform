@@ -19,7 +19,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +57,6 @@ class CartServiceTest {
         assertEquals(2, carts.size());
         assertTrue(carts.stream().anyMatch(cart ->
                 first.getId().equals(cart.id())
-                        && cart.quantity().equals(2)
                         && cart.status().equals(CartStatus.PENDING.name())
         ));
     }
@@ -88,7 +86,6 @@ class CartServiceTest {
 
         assertEquals(200, response.getStatus().getCode());
         assertEquals(cartRow.getId(), response.body().id());
-        assertEquals(4, response.body().quantity());
         assertEquals(CartStatus.CONFIRMED.name(), response.body().status());
     }
 
@@ -128,7 +125,7 @@ class CartServiceTest {
 
     @Test
     void createCartForcesPendingStatus() {
-        Cart request = new Cart(null, 3, "CANCELLED");
+        Cart request = new Cart(null, "CANCELLED");
 
         HttpResponse<Cart> response = client.toBlocking().exchange(
                 HttpRequest.POST("/carts", request),
@@ -138,7 +135,6 @@ class CartServiceTest {
         assertEquals(201, response.getStatus().getCode());
         Cart saved = response.body();
         assertNotNull(saved.id());
-        assertEquals(3, saved.quantity());
         assertEquals(CartStatus.PENDING.name(), saved.status());
     }
 
@@ -147,11 +143,10 @@ class CartServiceTest {
         Cart request = new Cart(
                 null,
                 null,
-                3,
                 "CANCELLED",
                 List.of(
-                        new CartItem(null, 2, 101L),
-                        new CartItem(null, 1, 102L)
+                        new CartItem(null, 2, 101L, 2L),
+                        new CartItem(null, 1, 102L, 3L)
                 )
         );
 
@@ -177,7 +172,7 @@ class CartServiceTest {
 
     @Test
     void createCartWithInvalidStatusReturnsBadRequest() {
-        Cart request = new Cart(null, 3, "INVALID");
+        Cart request = new Cart(null, "INVALID");
 
         HttpClientResponseException exception = assertThrows(
                 HttpClientResponseException.class,
@@ -295,9 +290,8 @@ class CartServiceTest {
 
     private CartRow saveCart(Long productId, int quantity, CartStatus status) {
         CartRow cartRow = new CartRow();
-        cartRow.setQuantity(quantity);
         cartRow.setStatus(status);
-        cartRow.setItems(List.of(new CartItemRow(null, cartRow, productId, quantity, BigDecimal.ONE)));
+        cartRow.setItems(List.of(new CartItemRow(null, cartRow, productId, quantity, 1L)));
         return cartRepository.save(cartRow);
     }
 

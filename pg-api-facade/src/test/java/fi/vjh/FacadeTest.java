@@ -91,7 +91,7 @@ class FacadeTest {
 
     @Test
     void delegatesCartCreation() {
-        var cart = new Cart(8L, 2, "PENDING");
+        var cart = new Cart(8L, "PENDING");
         var response = client.toBlocking().exchange(
                 HttpRequest.POST("/api/v1/frontend/carts", cart)
                         .contentType(MediaType.APPLICATION_JSON),
@@ -100,7 +100,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":8,\"quantity\":2,\"status\":\"PENDING\"}",
+                "{\"id\":8,\"status\":\"PENDING\"}",
                 response.body()
         );
     }
@@ -119,7 +119,7 @@ class FacadeTest {
     @Factory
     static class DownstreamClientMocks {
 
-        private final static Cart cart = new Cart(1L, 1, "STATUS");
+        private final static Cart cart = new Cart(1L, "STATUS");
 
         @Singleton
         @Replaces(ProductServiceClient.class)
@@ -224,7 +224,7 @@ class FacadeTest {
 
                 @Override
                 public Cart getCartById(Long id) {
-                    return new Cart(id, 2, "PENDING");
+                    return new Cart(id, "PENDING");
                 }
 
                 @Override
@@ -234,12 +234,12 @@ class FacadeTest {
 
                 @Override
                 public Cart cancelCart(Long id) {
-                    return new Cart(id, 2, "CANCELLED");
+                    return new Cart(id, "CANCELLED");
                 }
 
                 @Override
                 public Cart payCart(Long id) {
-                    return new Cart(id, 2, "CONFIRMED");
+                    return new Cart(id, "CONFIRMED");
                 }
 
                 @Override

@@ -112,7 +112,6 @@ public class CartController {
         return new Cart(
                 row.getId(),
                 row.getCartCreated(),
-                row.getQuantity(),
                 row.getStatus().name(),
                 mapItems(row.getItems())
         );
@@ -121,7 +120,6 @@ public class CartController {
     private CartRow convertToCartRow(Cart cart) {
         CartRow row = new CartRow();
         row.setId(cart.id());
-        row.setQuantity(cart.quantity());
         row.setCartCreated(cart.cartCreated());
         row.setStatus(CartStatus.valueOf(cart.status()));
         row.setItems(mapItemRows(cart.items(), row));
@@ -133,7 +131,7 @@ public class CartController {
             return List.of();
         }
         return items.stream()
-                .map(item -> new CartItem(item.getId(), item.getQuantity(), item.getProductId()))
+                .map(item -> new CartItem(item.getId(), item.getQuantity(), item.getProductId(), item.getPriceAtPurchaseInCents()))
                 .toList();
     }
 
@@ -147,6 +145,7 @@ public class CartController {
                     row.setId(item.id());
                     row.setProductId(item.productId());
                     row.setQuantity(item.itemCount());
+                    row.setPriceAtPurchaseInCents(item.priceInCents());
                     row.setCart(cart);
                     return row;
                 })

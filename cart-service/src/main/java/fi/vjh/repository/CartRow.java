@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 @Setter
@@ -21,7 +23,6 @@ public class CartRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer quantity;
     private Date cartCreated;
     @OneToMany(
             mappedBy = "cart",
@@ -29,9 +30,9 @@ public class CartRow {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<CartItemRow> items;
+    private List<CartItemRow> items = new LinkedList<>();
 
     @Enumerated(EnumType.STRING)
-    private CartStatus status;
+    private CartStatus status = CartStatus.PENDING;
 
 }

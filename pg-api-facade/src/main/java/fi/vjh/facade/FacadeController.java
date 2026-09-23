@@ -1,6 +1,7 @@
 package fi.vjh.facade;
 
 import fi.vjh.domain.Cart;
+import fi.vjh.domain.CartItem;
 import fi.vjh.domain.Order;
 import fi.vjh.domain.Product;
 import io.micronaut.context.annotation.Value;
@@ -142,6 +143,20 @@ public class FacadeController {
     @Post("/carts/create")
     public Cart createCart() {
         return cartService.create();
+    }
+
+    @Get("/carts/{id}/carttotal")
+    public Long cartTotal(Long id) {
+        long total = 0L;
+        for (CartItem item : cartService.getCartById(id).items()) {
+            total += item.itemCount() * item.priceInCents();
+        }
+        return total;
+    }
+
+    @Get("/carts/{id}/itemcount")
+    public int getItemCount(Long id) {
+        return cartService.getCartById(id).items().size();
     }
 
     @Get("/currency/convert")
