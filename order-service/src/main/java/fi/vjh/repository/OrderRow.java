@@ -22,6 +22,7 @@ public class OrderRow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long productId;
+    private Long cartId;
     private Integer quantity;
     private Date orderPlaced;
     @OneToMany(

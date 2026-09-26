@@ -51,7 +51,7 @@ class FacadeTest {
 
     @Test
     void delegatesOrderCreation() {
-        var order = new Order(7L, 1L, 2, "PENDING");
+        var order = new Order(7L, 1L, 7L, 2, "PENDING");
         var response = client.toBlocking().exchange(
                 HttpRequest.POST("/api/v1/frontend/orders", order)
                         .contentType(MediaType.APPLICATION_JSON),
@@ -60,7 +60,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":7,\"productId\":1,\"quantity\":2,\"status\":\"PENDING\"}",
+                "{\"id\":7,\"productId\":1,\"cartId\":7,\"quantity\":2,\"status\":\"PENDING\"}",
                 response.body()
         );
     }
@@ -99,7 +99,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":8,\"cartCreated\":null,\"status\":\"PENDING\",\"items\":[]}",
+                "{\"id\":8,\"cartCreated\":null,\"cartConfirmed\":null,\"status\":\"PENDING\",\"items\":[]}",
                 response.body()
         );
     }
@@ -173,7 +173,7 @@ class FacadeTest {
 
                 @Override
                 public Order getOrderById(Long id) {
-                    return new Order(id, 1L, 2, "PENDING");
+                    return new Order(id, 1L, 7L, 2, "PENDING");
                 }
 
                 @Override
@@ -183,12 +183,12 @@ class FacadeTest {
 
                 @Override
                 public Order cancelOrder(Long id) {
-                    return new Order(id, 1L, 2, "CANCELLED");
+                    return new Order(id, 1L, 7L, 2, "CANCELLED");
                 }
 
                 @Override
                 public Order payOrder(Long id) {
-                    return new Order(id, 1L, 2, "CONFIRMED");
+                    return new Order(id, 1L, 7L, 2, "CONFIRMED");
                 }
             };
         }

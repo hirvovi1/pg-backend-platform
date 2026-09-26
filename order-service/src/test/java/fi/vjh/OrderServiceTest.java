@@ -3,8 +3,8 @@ package fi.vjh;
 import fi.vjh.domain.Order;
 import fi.vjh.domain.OrderItem;
 import fi.vjh.domain.OrderStatus;
-import fi.vjh.repository.OrderItemRow;
 import fi.vjh.repository.OrderItemRepository;
+import fi.vjh.repository.OrderItemRow;
 import fi.vjh.repository.OrderRepository;
 import fi.vjh.repository.OrderRow;
 import io.micronaut.context.annotation.Property;
@@ -19,8 +19,8 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -130,7 +130,7 @@ class OrderServiceTest {
 
     @Test
     void createOrderForcesPendingStatus() {
-        Order request = new Order(null, 11L, 3, "CANCELLED");
+        Order request = new Order(null, 11L, 7L, 3, "CANCELLED");
 
         HttpResponse<Order> response = client.toBlocking().exchange(
                 HttpRequest.POST("/orders", request),
@@ -150,6 +150,7 @@ class OrderServiceTest {
         Order request = new Order(
                 null,
                 11L,
+                7L,
                 null,
                 3,
                 "CANCELLED",
@@ -181,7 +182,7 @@ class OrderServiceTest {
 
     @Test
     void createOrderWithInvalidStatusReturnsBadRequest() {
-        Order request = new Order(null, 11L, 3, "INVALID");
+        Order request = new Order(null, 11L, 7L, 3, "INVALID");
 
         HttpClientResponseException exception = assertThrows(
                 HttpClientResponseException.class,

@@ -25,6 +25,7 @@ public class CartRow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Date cartCreated;
+    private Date cartConfirmed;
     @OneToMany(
             mappedBy = "cart",
             fetch = FetchType.EAGER,

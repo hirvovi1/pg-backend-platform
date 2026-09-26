@@ -143,6 +143,7 @@ class CartServiceTest {
         Cart request = new Cart(
                 null,
                 null,
+                null,
                 "CANCELLED",
                 List.of(
                         new CartItem(null, 2, 101L, "p1", 2L),
@@ -227,7 +228,7 @@ class CartServiceTest {
     }
 
     @Test
-    void payCartConfirmsCartAndSetsCartCreatedDate() {
+    void payCartConfirmsCartAndSetsCartConfirmedDate() {
         CartRow cartRow = saveCart(30L, 2, CartStatus.PENDING);
         Date beforePayment = new Date();
 
@@ -239,13 +240,13 @@ class CartServiceTest {
         Date afterPayment = new Date();
         assertEquals(200, response.getStatus().getCode());
         assertEquals(CartStatus.CONFIRMED.name(), response.body().status());
-        assertNotNull(response.body().cartCreated());
-        assertFalse(response.body().cartCreated().before(beforePayment));
-        assertFalse(response.body().cartCreated().after(afterPayment));
+        assertNotNull(response.body().cartConfirmed());
+        assertFalse(response.body().cartConfirmed().before(beforePayment));
+        assertFalse(response.body().cartConfirmed().after(afterPayment));
 
         CartRow saved = cartRepository.findById(cartRow.getId()).orElseThrow();
         assertEquals(CartStatus.CONFIRMED, saved.getStatus());
-        assertNotNull(saved.getCartCreated());
+        assertNotNull(saved.getCartConfirmed());
     }
 
     @Test

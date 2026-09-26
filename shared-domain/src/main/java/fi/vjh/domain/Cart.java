@@ -12,6 +12,7 @@ import java.util.List;
 public record Cart(
         Long id,
         Date cartCreated,
+        Date cartConfirmed,
         String status,
         List<CartItem> items
 ) {
@@ -22,6 +23,6 @@ public record Cart(
         }
     }
     public Cart(Long id, String status) {
-        this(id, null, status, List.of());
+        this(id, null, null, status, List.of());
     }
 }

@@ -153,7 +153,8 @@ public class CartController {
                             return HttpResponse.<Cart>status(HttpStatus.CONFLICT);
                         }
                         cartRow.setStatus(CartStatus.CONFIRMED);
-                        cartRow.setCartCreated(new Date());
+                        cartRow.setCartConfirmed(new Date());
+                        cartRow.getItems().clear();
 
                         CartRow updated = cartRepository.update(cartRow);
                         LOG.info("Payment registered successfully. Cart ID: {} status updated to CONFIRMED", id);
@@ -189,6 +190,7 @@ public class CartController {
         return new Cart(
                 row.getId(),
                 row.getCartCreated(),
+                row.getCartConfirmed(),
                 row.getStatus() != null ? row.getStatus().name() : null,
                 mapItems(row.getItems())
         );

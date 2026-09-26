@@ -106,6 +106,7 @@ public class OrderController {
         return new Order(
                 row.getId(),
                 row.getProductId(),
+                row.getCartId(),
                 row.getOrderPlaced(),
                 row.getQuantity(),
                 row.getStatus().name(),
