@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Setter
 @Getter
 @NoArgsConstructor
@@ -23,7 +21,7 @@ public class ProductRow {
 
     private String name;
     private String description;
-    private BigDecimal price;
+    private Long priceInCents;
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)

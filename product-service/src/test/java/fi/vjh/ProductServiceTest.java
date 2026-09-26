@@ -19,7 +19,6 @@ import jakarta.inject.Singleton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -170,7 +169,7 @@ class ProductServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("Tumma paahto, pitää bugit loitolla.", coffee.getDescription());
-        assertEquals(new BigDecimal("12.50"), coffee.getPrice());
+        assertEquals(1250L, coffee.getPriceInCents());
         assertEquals("https://example.com", coffee.getImageUrl());
         assertEquals(ProductStatus.ACTIVE, coffee.getStatus());
 
@@ -179,7 +178,7 @@ class ProductServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("Nopeampi käynnistymisaika kuin puuvillalla yleensä.", shirt.getDescription());
-        assertEquals(new BigDecimal("25.00"), shirt.getPrice());
+        assertEquals(2500L, shirt.getPriceInCents());
         assertEquals("https://example.com", shirt.getImageUrl());
         assertEquals(ProductStatus.ACTIVE, shirt.getStatus());
     }
@@ -207,7 +206,7 @@ class ProductServiceTest {
                 null,
                 name,
                 "Test description",
-                new BigDecimal("10.00"),
+                1000L,
                 "https://example.com/product",
                 status
         );
@@ -217,7 +216,7 @@ class ProductServiceTest {
         ProductRow productRow = new ProductRow();
         productRow.setName(name);
         productRow.setDescription("Test description");
-        productRow.setPrice(new BigDecimal("10.00"));
+        productRow.setPriceInCents(1000L);
         productRow.setImageUrl("https://example.com/product");
         productRow.setStatus(status);
         return productRow;

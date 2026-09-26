@@ -1,21 +1,22 @@
 package fi.vjh.controller;
 
 import fi.vjh.domain.Product;
-import fi.vjh.repository.ProductRow;
 import fi.vjh.domain.ProductStatus;
 import fi.vjh.repository.ProductRepository;
+import fi.vjh.repository.ProductRow;
 import fi.vjh.service.OrderServicePort;
-import io.micronaut.scheduling.TaskExecutors;
-import io.micronaut.scheduling.annotation.ExecuteOn;
+import io.micronaut.context.annotation.Value;
+import io.micronaut.context.event.StartupEvent;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
-import io.micronaut.context.annotation.Value;
-import io.micronaut.context.event.StartupEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 @Controller("/products")
@@ -55,7 +56,7 @@ public class ProductController {
                 row.getId(),
                 row.getName(),
                 row.getDescription(),
-                row.getPrice(),
+                row.getPriceInCents(),
                 row.getImageUrl(),
                 row.getStatus()
         );
@@ -74,7 +75,7 @@ public class ProductController {
         row.setId(product.id());
         row.setName(product.name());
         row.setDescription(product.description());
-        row.setPrice(product.price());
+        row.setPriceInCents(product.priceInCents());
         row.setImageUrl(product.imageUrl());
         row.setStatus(product.status());
         return row;

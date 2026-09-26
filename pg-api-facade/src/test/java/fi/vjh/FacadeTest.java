@@ -21,7 +21,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "[{\"id\":1,\"name\":\"Coffee\",\"description\":\"Beans\",\"price\":9.99,\"imageUrl\":\"coffee.png\",\"status\":\"ACTIVE\"}]",
+                "[{\"id\":1,\"name\":\"Coffee\",\"description\":\"Beans\",\"priceInCents\":999,\"imageUrl\":\"coffee.png\",\"status\":\"ACTIVE\"}]",
                 response.body()
         );
     }
@@ -131,7 +130,7 @@ class FacadeTest {
                             1L,
                             "Coffee",
                             "Beans",
-                            new BigDecimal("9.99"),
+                            999L,
                             "coffee.png",
                             ProductStatus.ACTIVE
                     ));

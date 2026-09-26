@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "order_items")
 @Getter
@@ -24,6 +22,6 @@ public class OrderItemRow {
     private Long productId;
     private int quantity;
 
-    private BigDecimal priceAtPurchase;
+    private Long priceAtPurchase;
 
 }
