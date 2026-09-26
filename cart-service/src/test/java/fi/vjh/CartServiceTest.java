@@ -124,7 +124,7 @@ class CartServiceTest {
     }
 
     @Test
-    void createCartForcesPendingStatus() {
+    void saveCartForcesPendingStatus() {
         Cart request = new Cart(null, "CANCELLED");
 
         HttpResponse<Cart> response = client.toBlocking().exchange(
@@ -139,14 +139,14 @@ class CartServiceTest {
     }
 
     @Test
-    void createCartPersistsAndReturnsCartItems() {
+    void saveCartPersistsAndReturnsCartItems() {
         Cart request = new Cart(
                 null,
                 null,
                 "CANCELLED",
                 List.of(
-                        new CartItem(null, 2, 101L, 2L),
-                        new CartItem(null, 1, 102L, 3L)
+                        new CartItem(null, 2, 101L, "p1", 2L),
+                        new CartItem(null, 1, 102L, "p2", 3L)
                 )
         );
 
@@ -171,7 +171,7 @@ class CartServiceTest {
     }
 
     @Test
-    void createCartWithInvalidStatusReturnsBadRequest() {
+    void saveCartWithInvalidStatusReturnsBadRequest() {
         Cart request = new Cart(null, "INVALID");
 
         HttpClientResponseException exception = assertThrows(
@@ -184,6 +184,20 @@ class CartServiceTest {
 
         assertEquals(400, exception.getStatus().getCode());
     }
+
+    @Test
+    void createCartWithNoItemsReturnsEmptyList() {
+
+        HttpResponse<Cart> response = client.toBlocking().exchange(
+                HttpRequest.POST("/carts/create", ""),
+                Cart.class
+        );
+
+        assertEquals(201, response.getStatus().getCode());
+        Cart cart = response.body();
+        assertNotNull(cart.items());
+    }
+
 
     @Test
     void cancelCartChangesStatusToCancelled() {
@@ -291,7 +305,7 @@ class CartServiceTest {
     private CartRow saveCart(Long productId, int quantity, CartStatus status) {
         CartRow cartRow = new CartRow();
         cartRow.setStatus(status);
-        cartRow.setItems(List.of(new CartItemRow(null, cartRow, productId, quantity, 1L)));
+        cartRow.setItems(List.of(new CartItemRow(null, cartRow, productId, "p name", quantity, 1L)));
         return cartRepository.save(cartRow);
     }
 

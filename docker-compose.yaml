@@ -11,6 +11,8 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - mock-payment-network
+    depends_on:
+      - cart-service
 
   usd-currency-service:
     container_name: usd-currency-service
@@ -69,10 +71,16 @@ services:
       dockerfile: cart-service/Dockerfile
     ports:
       - "8084:8084"
+      - "9092:9092"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - mock-payment-network
+    volumes:
+      - ~/.m2:/root/.m2
+    environment:
+      - MICRONAUT_SERVER_HOST=0.0.0.0
+      - JAVA_OPTS=-Dh2.bindAddress=0.0.0.0
 
 networks:
   mock-payment-network:

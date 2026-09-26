@@ -22,6 +22,7 @@ public class CartItemRow {
     private CartRow cart;
 
     private Long productId;
+    private String productName;
     private int quantity;
     private Long priceAtPurchaseInCents;
 

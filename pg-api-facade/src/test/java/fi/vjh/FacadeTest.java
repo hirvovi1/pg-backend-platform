@@ -100,7 +100,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":8,\"status\":\"PENDING\"}",
+                "{\"id\":8,\"cartCreated\":null,\"status\":\"PENDING\",\"items\":[]}",
                 response.body()
         );
     }

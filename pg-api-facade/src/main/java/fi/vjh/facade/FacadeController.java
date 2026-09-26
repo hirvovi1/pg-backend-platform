@@ -47,106 +47,129 @@ public class FacadeController {
 
     @EventListener
     public void onEvent(StartupEvent event) {
-        LOG.info("Facade api version {}", version);
+        LOG.info("+ Facade version: {}", version);
     }
 
     @Get("/products")
     public List<Product> getProducts() {
+        logCall("getProducts");
         return productService.getProducts();
     }
 
     @Get("/products/{id}")
     public Product getProductById(Long id) {
+        logCall("getProductById");
         return productService.getProductById(id);
     }
 
     @Post("/products")
     public Product addProduct(@Body Product product) {
+        logCall("addProduct");
         return productService.addProduct(product);
     }
 
     @Delete("/products/{id}")
     public void deleteProduct(Long id) {
+        logCall("deleteProduct");
         productService.deleteProduct(id);
     }
 
     @Get("/orders")
     public List<Order> getOrders() {
+        logCall("getOrders");
         return orderService.getOrders();
     }
 
     @Get("/orders/product/{productId}")
     public List<Order> getOrdersForProduct(Long productId) {
+        logCall("getOrdersForProduct");
         return orderService.getOrdersForProduct(productId);
     }
 
     @Get("/orders/product/{productId}/has-open-orders")
     public boolean productHasOpenOrders(Long productId) {
+        logCall("productHasOpenOrders");
         return orderService.productHasOpenOrders(productId);
     }
 
     @Get("/orders/{id}")
     public Order getOrderById(Long id) {
+        logCall("getOrderById");
         return orderService.getOrderById(id);
     }
 
     @Post("/orders")
     public Order addOrder(@Body Order order) {
+        logCall("addOrder");
         return orderService.addOrder(order);
     }
 
     @Put("/orders/{id}/cancel")
     public Order cancelOrder(Long id) {
+        logCall("cancelOrder");
         return orderService.cancelOrder(id);
     }
 
     @Put("/orders/{id}/pay")
     public Order payOrder(Long id) {
+        logCall("payOrder");
         return orderService.payOrder(id);
     }
 
     @Get("/carts")
     public List<Cart> getCarts() {
+        logCall("getCarts");
         return cartService.getCarts();
     }
 
     @Get("/carts/product/{productId}")
     public List<Cart> getCartsForProduct(Long productId) {
+        logCall("getCartsForProduct");
         return cartService.getCartsForProduct(productId);
     }
 
     @Get("/carts/product/{productId}/has-open-carts")
     public boolean productHasOpenCarts(Long productId) {
+        logCall("productHasOpenCarts");
         return cartService.productHasOpenCarts(productId);
     }
 
     @Get("/carts/{id}")
     public Cart getCartById(Long id) {
-        return cartService.getCartById(id);
+        logCall("getCartById");
+        final Cart c = cartService.getCartById(id);
+        LOG.info("F -> sending to frontend --> Cart contains items: {}", c.items().toString());
+        return c;
     }
 
     @Post("/carts")
     public Cart saveCart(@Body Cart cart) {
+        logCall("saveCart");
         return cartService.saveCart(cart);
     }
 
     @Put("/carts/{id}/cancel")
     public Cart cancelCart(Long id) {
+
+        logCall("cancelCart");
         return cartService.cancelCart(id);
     }
 
     @Put("/carts/{id}/pay")
     public Cart payCart(Long id) {
+        logCall("payCart");
         return cartService.payCart(id);
     }
 
     @Post("/carts/create")
     public Cart createCart() {
+        logCall("create cart");
         return cartService.create();
     }
 
     @Get("/carts/{id}/carttotal")
     public Long cartTotal(Long id) {
+        logCall("cartTotal");
         long total = 0L;
         for (CartItem item : cartService.getCartById(id).items()) {
             total += item.itemCount() * item.priceInCents();
@@ -156,12 +179,18 @@ public class FacadeController {
 
     @Get("/carts/{id}/itemcount")
     public int getItemCount(Long id) {
+        logCall("getItemCount");
         return cartService.getCartById(id).items().size();
     }
 
     @Get("/currency/convert")
     public Map<String, Object> convertToUsd(@QueryValue double amountInCents) {
+        logCall("convertToUsd");
         return currencyService.convertToUsd(amountInCents);
+    }
+
+    private static void logCall(String msg) {
+        LOG.info("facade -> " + msg);
     }
 
 }

@@ -7,6 +7,7 @@ public record CartItem(
         Long id,
         Integer itemCount,
         Long productId,
+        String productName,
         Long priceInCents
 ) {
 }

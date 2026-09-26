@@ -6,15 +6,16 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 @Setter
 @Getter
 @NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "carts")
 @Serdeable
@@ -30,7 +31,14 @@ public class CartRow {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<CartItemRow> items = new LinkedList<>();
+    private List<CartItemRow> items;
+
+    public List<CartItemRow> getItems() {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+        return this.items;
+    }
 
     @Enumerated(EnumType.STRING)
     private CartStatus status = CartStatus.PENDING;
