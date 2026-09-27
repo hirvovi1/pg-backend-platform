@@ -148,13 +148,8 @@ public class CartController {
         try {
             return cartRepository.findById(id)
                     .map(cartRow -> {
-                        if (cartRow.getStatus() != CartStatus.PENDING) {
-                            LOG.warn("Payment conflict: Cart ID {} is in state [{}] but must be PENDING to proceed", id, cartRow.getStatus());
-                            return HttpResponse.<Cart>status(HttpStatus.CONFLICT);
-                        }
                         cartRow.setStatus(CartStatus.CONFIRMED);
                         cartRow.setCartConfirmed(new Date());
-                        cartRow.getItems().clear();
 
                         CartRow updated = cartRepository.update(cartRow);
                         LOG.info("Payment registered successfully. Cart ID: {} status updated to CONFIRMED", id);

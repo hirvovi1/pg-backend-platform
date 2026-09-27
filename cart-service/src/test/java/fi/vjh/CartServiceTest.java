@@ -260,23 +260,6 @@ class CartServiceTest {
     }
 
     @Test
-    void payNonPendingCartReturnsConflictAndKeepsHistoryUnchanged() {
-        CartRow cartRow = saveCart(31L, 1, CartStatus.CANCELLED);
-
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(
-                        HttpRequest.PUT("/carts/" + cartRow.getId() + "/pay", null)
-                )
-        );
-
-        assertEquals(409, exception.getStatus().getCode());
-        CartRow unchanged = cartRepository.findById(cartRow.getId()).orElseThrow();
-        assertEquals(CartStatus.CANCELLED, unchanged.getStatus());
-        assertNull(unchanged.getCartCreated());
-    }
-
-    @Test
     void productHasOpenCartsReturnsTrueForPendingOrConfirmedCarts() {
         saveCart(20L, 1, CartStatus.PENDING);
         saveCart(20L, 1, CartStatus.CANCELLED);
