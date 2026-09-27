@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,19 +23,25 @@ public class OrderRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long productId;
     private Long cartId;
     private Integer quantity;
+
+    @CreationTimestamp
     private Date orderPlaced;
+
     @OneToMany(
             mappedBy = "order",
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<OrderItemRow> items;
+    private List<OrderItemRow> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    public void addItem(OrderItemRow item) {
+        this.items.add(item);
+        item.setOrder(this);
+    }
 }

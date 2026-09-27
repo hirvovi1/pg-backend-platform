@@ -8,6 +8,7 @@ import fi.vjh.repository.OrderRepository;
 import fi.vjh.repository.OrderRow;
 import io.micronaut.context.annotation.Value;
 import io.micronaut.context.event.StartupEvent;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller("/orders")
 @RequiredArgsConstructor
@@ -36,17 +38,60 @@ public class OrderController {
     }
 
     @Get
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll().stream()
+    public HttpResponse<List<Order>> getAllOrders() {
+        List<Order> orders = orderRepository.findAll().stream()
                 .map(this::convertToOrder)
                 .toList();
+        return HttpResponse.ok(orders);
     }
 
     @Get("/product/{productId}")
-    public List<Order> getOrdersForProduct(Long productId) {
-        return orderRepository.findByProductId(productId).stream()
-                .map(this::convertToOrder)
-                .toList();
+    public HttpResponse<List<Order>> getOrdersForProduct(Long productId) {
+        List<Order> orders = orderRepository
+                .findByItemsProductIdAndStatusIn(productId, List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED))
+                .stream().map(this::convertToOrder).toList();
+        debugOrders(orders);
+        LOG.info("Found {} orders for product {}", orders.size(), productId);
+        LOG.info("listing all orders from db");
+        debugOrderRows(orderRepository.findAll());
+        LOG.info("--> end. returning status ok **************************************");
+        return HttpResponse.ok(orders);
+    }
+
+    private void debugOrderRows(@NonNull List<OrderRow> all) {
+        LOG.info("Found {} orders in db", all.size());
+        for (OrderRow orderRow : all) {
+            LOG.info("Order {} has status {}", orderRow.getId(), orderRow.getStatus());
+
+            LOG.info("listing order items:");
+            for (OrderItemRow item : orderRow.getItems()) {
+                LOG.info("Order item {} with product id {} has quantity {}", item.getId(), item.getProductId(), item.getQuantity());
+            }
+        }
+    }
+
+    private void debugOrders(List<Order> orders) {
+        LOG.info("Found {} orders for product", orders.size());
+        for (Order order : orders) {
+            LOG.info("Order {} has status {}", order.id(), order.status());
+
+            LOG.info("listing order items:");
+            for (OrderItem item : order.items()) {
+                LOG.info("Order item {} with product id {} has quantity {}", item.id(), item.productId(), item.itemCount());
+            }
+        }
+    }
+
+    @Get("/product/{productId}/has-open-orders")
+    public HttpResponse<Boolean> productHasOpenOrders(Long productId) {
+        LOG.info("Checking for open orders for product {}", productId);
+        List<OrderRow> orders = orderRepository.findByItemsProductIdAndStatusIn(
+                productId,
+                List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED)
+        );
+        debugOrderRows(orders);
+        boolean hasOpenOrders = !orders.isEmpty();
+        return HttpResponse.status(HttpStatus.OK).body(hasOpenOrders);
     }
 
     @Get("/{id}")
@@ -71,12 +116,15 @@ public class OrderController {
 
     @Put("/{id}/cancel")
     public HttpResponse<Order> cancelOrder(Long id) {
-        return orderRepository.findById(id)
-                .map(orderRow -> {
-                    orderRow.setStatus(OrderStatus.CANCELLED);
-                    return HttpResponse.ok(convertToOrder(orderRepository.update(orderRow)));
-                })
-                .orElse(HttpResponse.notFound());
+        Optional<OrderRow> order = orderRepository.findById(id);
+        if (order.isPresent()) {
+            LOG.info("Canceling order {}", id);
+            OrderRow orderRow = order.get();
+            orderRow.setStatus(OrderStatus.CANCELLED);
+            Order converted = convertToOrder(orderRepository.update(orderRow));
+            return HttpResponse.ok(converted);
+        }
+        return HttpResponse.notFound();
     }
 
     @Put("/{id}/pay")
@@ -93,19 +141,9 @@ public class OrderController {
                 .orElse(HttpResponse.notFound());
     }
 
-    @Get("/product/{productId}/has-open-orders")
-    public HttpResponse<Boolean> productHasOpenOrders(Long productId) {
-        boolean hasOpenOrders = !orderRepository.findByProductIdAndStatusIn(
-                productId,
-                List.of(OrderStatus.PENDING, OrderStatus.CONFIRMED)
-        ).isEmpty();
-        return HttpResponse.status(HttpStatus.OK).body(hasOpenOrders);
-    }
-
     private Order convertToOrder(OrderRow row) {
         return new Order(
                 row.getId(),
-                row.getProductId(),
                 row.getCartId(),
                 row.getOrderPlaced(),
                 row.getQuantity(),
@@ -117,7 +155,7 @@ public class OrderController {
     private OrderRow convertToOrderRow(Order order) {
         OrderRow row = new OrderRow();
         row.setId(order.id());
-        row.setProductId(order.productId());
+        row.setCartId(order.cartId());
         row.setQuantity(order.quantity());
         row.setOrderPlaced(order.orderPlaced());
         row.setStatus(OrderStatus.valueOf(order.status()));
