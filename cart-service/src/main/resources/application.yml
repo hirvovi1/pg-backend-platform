@@ -3,6 +3,21 @@ micronaut:
     name: cart-service
   server:
     port: 8084
+    cors:
+      enabled: true
+      configurations:
+        frontend:
+          allowed-origins:
+            - "http://localhost:5173"
+          allowed-methods:
+            - GET
+            - POST
+            - OPTIONS
+            - PUT
+            - DELETE
+          allowed-headers:
+            - Content-Type
+            - Authorization
 
 datasources:
   default:

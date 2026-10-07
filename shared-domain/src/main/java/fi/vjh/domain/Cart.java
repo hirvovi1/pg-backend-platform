@@ -1,26 +1,28 @@
 package fi.vjh.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.micronaut.core.annotation.Creator;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.Date;
 import java.util.List;
 
 @Serdeable
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public record Cart(
         Long id,
-        Long productId,
         Date cartCreated,
-        Integer quantity,
+        Date cartConfirmed,
         String status,
         List<CartItem> items
 ) {
-
-    public Cart(Long id, Long productId, Integer quantity, String status) {
-        this(id, productId, null, quantity, status, List.of());
+    @Creator
+    public Cart {
+        if (items == null) {
+            items = List.of();
+        }
     }
-
-    public static Cart from(Cart cart, Date cartCreated) {
-        return new Cart(cart.id, cart.productId, cartCreated, cart.quantity, cart.status, cart.items);
+    public Cart(Long id, String status) {
+        this(id, null, null, status, List.of());
     }
-
 }

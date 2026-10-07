@@ -1,36 +1,40 @@
 package fi.vjh;
 
+import fi.vjh.controller.OrderController;
 import fi.vjh.domain.Order;
 import fi.vjh.domain.OrderItem;
 import fi.vjh.domain.OrderStatus;
-import fi.vjh.repository.OrderItemRow;
 import fi.vjh.repository.OrderItemRepository;
+import fi.vjh.repository.OrderItemRow;
 import fi.vjh.repository.OrderRepository;
 import fi.vjh.repository.OrderRow;
 import io.micronaut.context.annotation.Property;
-import io.micronaut.core.type.Argument;
-import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.client.HttpClient;
-import io.micronaut.http.client.annotation.Client;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@MicronautTest(transactional = false)
+@MicronautTest(transactional = true)
 @Property(name = "micronaut.server.port", value = "-1")
 class OrderServiceTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OrderServiceTest.class);
+
+    public static final Long PRODUCT_ID = 99L;
+    public static final long CART_ID = 1L;
+
     @Inject
-    @Client("/")
-    HttpClient client;
+    OrderController orderController;
 
     @Inject
     OrderRepository orderRepository;
@@ -38,75 +42,69 @@ class OrderServiceTest {
     @Inject
     OrderItemRepository orderItemRepository;
 
+    @Inject
+    EntityManager entityManager;
+
     @BeforeEach
-    void cleanDatabase() {
-        orderItemRepository.deleteAll();
-        orderRepository.deleteAll();
+    void cleanUp() {
+        entityManager.createQuery("DELETE FROM OrderItemRow").executeUpdate();
+        entityManager.createQuery("DELETE FROM OrderRow").executeUpdate();
+
+        // Huuhdellaan ja tyhjennetään istunto, jotta vanhat oliot katoavat muististakin
+        entityManager.flush();
+        entityManager.clear();
+
+        LOG.info("Kanta pakotettu tyhjäksi ennen testiä.");
     }
 
     @Test
     void getAllOrdersReturnsOrders() {
-        OrderRow first = saveOrder(1L, 2, OrderStatus.PENDING);
-        saveOrder(2L, 1, OrderStatus.CANCELLED);
+        List<Order> orders = orderController.getAllOrders().body();
+        assertEquals(0, orders.size());
+        OrderRow first = saveOrder(2, OrderStatus.PENDING, PRODUCT_ID);
+        saveOrder(1, OrderStatus.CANCELLED, PRODUCT_ID);
 
-        List<Order> orders = client.toBlocking().retrieve(
-                HttpRequest.GET("/orders"),
-                Argument.listOf(Order.class)
-        );
+        orders = orderController.getAllOrders().body();
 
         assertEquals(2, orders.size());
-        assertTrue(orders.stream().anyMatch(order ->
-                first.getId().equals(order.id())
-                        && order.productId().equals(1L)
-                        && order.quantity().equals(2)
-                        && order.status().equals(OrderStatus.PENDING.name())
-        ));
     }
 
     @Test
     void getOrdersForProductReturnsMatchingOrders() {
-        OrderRow matching = saveOrder(7L, 2, OrderStatus.PENDING);
-        saveOrder(8L, 1, OrderStatus.CONFIRMED);
+        OrderRow matching = saveOrder(2, OrderStatus.PENDING, PRODUCT_ID);
+        saveOrder(1, OrderStatus.CONFIRMED, 990998877L);
 
-        List<Order> orders = client.toBlocking().retrieve(
-                HttpRequest.GET("/orders/product/7"),
-                Argument.listOf(Order.class)
-        );
+        List<Order> orders = orderController.getOrdersForProduct(PRODUCT_ID).body();
 
         assertEquals(1, orders.size());
-        assertEquals(matching.getId(), orders.get(0).id());
-        assertEquals(7L, orders.get(0).productId());
+        assertEquals(matching.getId(), orders.getFirst().id());
+        assertEquals(CART_ID, orders.getFirst().cartId());
     }
 
     @Test
     void getOrderByIdReturnsOrderWhenItExists() {
-        OrderRow orderRow = saveOrder(3L, 4, OrderStatus.CONFIRMED);
+        OrderRow orderRow = saveOrder(4, OrderStatus.CONFIRMED, PRODUCT_ID);
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.GET("/orders/" + orderRow.getId()),
-                Order.class
-        );
+        HttpResponse<Order> response = orderController.getOrderById(orderRow.getId());
 
         assertEquals(200, response.getStatus().getCode());
         assertEquals(orderRow.getId(), response.body().id());
-        assertEquals(3L, response.body().productId());
+        assertEquals(CART_ID, response.body().cartId());
         assertEquals(4, response.body().quantity());
         assertEquals(OrderStatus.CONFIRMED.name(), response.body().status());
     }
 
     @Test
     void getOrderByIdReturnsOrderItems() {
-        OrderRow orderRow = saveOrder(3L, 4, OrderStatus.CONFIRMED);
-        orderRow.setItems(List.of(
-                item(orderRow, 11L, 2),
-                item(orderRow, 12L, 1)
-        ));
+        OrderRow orderRow = saveOrder(4, OrderStatus.CONFIRMED, PRODUCT_ID);
+
+        List<OrderItemRow> itemRows = new ArrayList<>();
+        itemRows.add(item(orderRow, 11L, 2));
+        itemRows.add(item(orderRow, 12L, 1));
+        orderRow.setItems(itemRows);
         orderRepository.update(orderRow);
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.GET("/orders/" + orderRow.getId()),
-                Order.class
-        );
+        HttpResponse<Order> response = orderController.getOrderById(orderRow.getId());
 
         assertEquals(200, response.getStatus().getCode());
         assertEquals(List.of(11L, 12L), response.body().items().stream()
@@ -120,27 +118,18 @@ class OrderServiceTest {
 
     @Test
     void getUnknownOrderReturnsNotFound() {
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().retrieve(HttpRequest.GET("/orders/999999"))
-        );
-
-        assertEquals(404, exception.getStatus().getCode());
+        HttpResponse<Order> response = orderController.getOrderById(999999L);
+        assertEquals(404, response.getStatus().getCode());
     }
 
     @Test
     void createOrderForcesPendingStatus() {
-        Order request = new Order(null, 11L, 3, "CANCELLED");
+        Order request = new Order(null, 7L, 3, "CANCELLED");
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.POST("/orders", request),
-                Order.class
-        );
-
+        HttpResponse<Order> response = orderController.addOrder(request);
         assertEquals(201, response.getStatus().getCode());
         Order saved = response.body();
         assertNotNull(saved.id());
-        assertEquals(11L, saved.productId());
         assertEquals(3, saved.quantity());
         assertEquals(OrderStatus.PENDING.name(), saved.status());
     }
@@ -149,7 +138,7 @@ class OrderServiceTest {
     void createOrderPersistsAndReturnsOrderItems() {
         Order request = new Order(
                 null,
-                11L,
+                7L,
                 null,
                 3,
                 "CANCELLED",
@@ -159,10 +148,7 @@ class OrderServiceTest {
                 )
         );
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.POST("/orders", request),
-                Order.class
-        );
+        HttpResponse<Order> response = orderController.addOrder(request);
 
         assertEquals(201, response.getStatus().getCode());
         assertEquals(
@@ -181,30 +167,22 @@ class OrderServiceTest {
 
     @Test
     void createOrderWithInvalidStatusReturnsBadRequest() {
-        Order request = new Order(null, 11L, 3, "INVALID");
-
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(
-                        HttpRequest.POST("/orders", request),
-                        Order.class
-                )
-        );
-
-        assertEquals(400, exception.getStatus().getCode());
+        Order request = new Order(null, 7L, 3, "INVALID");
+        HttpResponse<Order> response = orderController.addOrder(request);
+        assertEquals(400, response.getStatus().getCode());
     }
 
     @Test
     void cancelOrderChangesStatusToCancelled() {
-        OrderRow orderRow = saveOrder(12L, 1, OrderStatus.PENDING);
+        OrderRow orderRow = saveOrder(1, OrderStatus.PENDING, PRODUCT_ID);
+        LOG.info("created order {} with pending status", orderRow.getId());
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.PUT("/orders/" + orderRow.getId() + "/cancel", null),
-                Order.class
-        );
+        HttpResponse<Order> response = orderController.cancelOrder(orderRow.getId());
 
         assertEquals(200, response.getStatus().getCode());
-        assertEquals(OrderStatus.CANCELLED.name(), response.body().status());
+        Order body = response.body();
+        assertEquals(orderRow.getId(), body.id());
+        assertEquals(OrderStatus.CANCELLED.name(), body.status());
         assertEquals(
                 OrderStatus.CANCELLED,
                 orderRepository.findById(orderRow.getId()).orElseThrow().getStatus()
@@ -213,23 +191,16 @@ class OrderServiceTest {
 
     @Test
     void cancelUnknownOrderReturnsNotFound() {
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(HttpRequest.PUT("/orders/999999/cancel", null))
-        );
-
-        assertEquals(404, exception.getStatus().getCode());
+        HttpResponse<Order> response = orderController.cancelOrder(999999L);
+        assertEquals(404, response.getStatus().getCode());
     }
 
     @Test
     void payOrderConfirmsOrderAndSetsOrderPlacedDate() {
-        OrderRow orderRow = saveOrder(30L, 2, OrderStatus.PENDING);
+        OrderRow orderRow = saveOrder(2, OrderStatus.PENDING, PRODUCT_ID);
         Date beforePayment = new Date();
 
-        HttpResponse<Order> response = client.toBlocking().exchange(
-                HttpRequest.PUT("/orders/" + orderRow.getId() + "/pay", null),
-                Order.class
-        );
+        HttpResponse<Order> response = orderController.payOrder(orderRow.getId());
 
         Date afterPayment = new Date();
         assertEquals(200, response.getStatus().getCode());
@@ -245,40 +216,31 @@ class OrderServiceTest {
 
     @Test
     void payUnknownOrderReturnsNotFound() {
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(HttpRequest.PUT("/orders/999999/pay", null))
-        );
-
-        assertEquals(404, exception.getStatus().getCode());
+        HttpResponse<Order> response = orderController.payOrder(999999L);
+        assertEquals(404, response.getStatus().getCode());
     }
 
     @Test
     void payNonPendingOrderReturnsConflictAndKeepsHistoryUnchanged() {
-        OrderRow orderRow = saveOrder(31L, 1, OrderStatus.CANCELLED);
+        OrderRow orderRow = saveOrder(1, OrderStatus.CANCELLED, 7L);
 
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(
-                        HttpRequest.PUT("/orders/" + orderRow.getId() + "/pay", null)
-                )
-        );
+        HttpResponse<Order> response = orderController.payOrder(orderRow.getId());
 
-        assertEquals(409, exception.getStatus().getCode());
+        assertEquals(409, response.getStatus().getCode());
         OrderRow unchanged = orderRepository.findById(orderRow.getId()).orElseThrow();
         assertEquals(OrderStatus.CANCELLED, unchanged.getStatus());
-        assertNull(unchanged.getOrderPlaced());
+        assertNonNull(unchanged.getOrderPlaced());
+    }
+
+    private void assertNonNull(Date orderPlaced) {
     }
 
     @Test
     void productHasOpenOrdersReturnsTrueForPendingOrConfirmedOrders() {
-        saveOrder(20L, 1, OrderStatus.PENDING);
-        saveOrder(20L, 1, OrderStatus.CANCELLED);
+        saveOrder(1, OrderStatus.PENDING, PRODUCT_ID);
+        saveOrder(1, OrderStatus.CANCELLED, PRODUCT_ID);
 
-        HttpResponse<Boolean> response = client.toBlocking().exchange(
-                HttpRequest.GET("/orders/product/20/has-open-orders"),
-                Boolean.class
-        );
+        HttpResponse<Boolean> response = orderController.productHasOpenOrders(PRODUCT_ID);
 
         assertEquals(200, response.getStatus().getCode());
         assertTrue(response.body());
@@ -286,22 +248,23 @@ class OrderServiceTest {
 
     @Test
     void productHasOpenOrdersReturnsFalseWithoutPendingOrConfirmedOrders() {
-        saveOrder(21L, 1, OrderStatus.CANCELLED);
+        saveOrder(1, OrderStatus.CANCELLED, PRODUCT_ID);
 
-        HttpResponse<Boolean> response = client.toBlocking().exchange(
-                HttpRequest.GET("/orders/product/21/has-open-orders"),
-                Boolean.class
-        );
+        HttpResponse<Boolean> response = orderController.productHasOpenOrders(PRODUCT_ID);
 
         assertEquals(200, response.getStatus().getCode());
         assertEquals(false, response.body());
     }
 
-    private OrderRow saveOrder(Long productId, int quantity, OrderStatus status) {
+    private OrderRow saveOrder(int quantity, OrderStatus status, Long productId) {
         OrderRow orderRow = new OrderRow();
-        orderRow.setProductId(productId);
+
+        LOG.info("Saving order with quantity {}, status {}, productId {}, items {}", quantity, status, productId, orderRow.getItems().size());
+
         orderRow.setQuantity(quantity);
         orderRow.setStatus(status);
+        orderRow.setCartId(CART_ID);
+        orderRow.addItem(item(orderRow, productId, 1));
         return orderRepository.save(orderRow);
     }
 

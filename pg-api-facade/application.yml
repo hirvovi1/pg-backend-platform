@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: pg-api-facade
+  server:
+    port: 8091

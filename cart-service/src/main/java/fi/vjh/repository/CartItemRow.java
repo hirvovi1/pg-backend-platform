@@ -1,17 +1,17 @@
 package fi.vjh.repository;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cart_items")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CartItemRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +22,8 @@ public class CartItemRow {
     private CartRow cart;
 
     private Long productId;
+    private String productName;
     private int quantity;
-
-    private BigDecimal priceAtPurchase;
+    private Long priceAtPurchaseInCents;
 
 }

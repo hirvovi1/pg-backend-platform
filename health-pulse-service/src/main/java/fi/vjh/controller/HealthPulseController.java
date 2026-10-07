@@ -32,7 +32,7 @@ public class HealthPulseController {
     private String version;
 
     private final Map<String, EndpointURL> endpoints = Map.of(
-            "Java account api", EndpointURL.of("http://pgapi:8080/accounts"),
+            "account service", EndpointURL.of("http://pgapi:8080/accounts"),
             "currency service", EndpointURL.of("http://usd-currency-service:8090/api/usd/convert?amountInCents=100"),
             "product service", EndpointURL.of("http://product-service:8082/products"),
             "order service", EndpointURL.of("http://order-service:8083/orders"),
@@ -47,7 +47,7 @@ public class HealthPulseController {
     @Get(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM)
     public Publisher<Event<Map<String, Object>>> getHealthStream() {
         List<String> serviceNames = new ArrayList<>(endpoints.keySet());
-        LOG.info("HEALT PULSE called. registered services: {}", serviceNames);
+        LOG.info("HEALTH PULSE called. registered services: {}", serviceNames);
 
         return Flux.interval(Duration.ofSeconds(3))
                 .publishOn(Schedulers.boundedElastic())

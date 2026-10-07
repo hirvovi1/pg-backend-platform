@@ -9,6 +9,7 @@ import fi.vjh.facade.CurrencyServiceClient;
 import fi.vjh.facade.OrderServiceClient;
 import fi.vjh.facade.ProductServiceClient;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
@@ -20,14 +21,14 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@MicronautTest
+@MicronautTest(transactional = false)
+@Property(name = "micronaut.server.port", value = "-1")
 class FacadeTest {
 
     @Inject
@@ -43,14 +44,14 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "[{\"id\":1,\"name\":\"Coffee\",\"description\":\"Beans\",\"price\":9.99,\"imageUrl\":\"coffee.png\",\"status\":\"ACTIVE\"}]",
+                "[{\"id\":1,\"name\":\"Coffee\",\"description\":\"Beans\",\"priceInCents\":999,\"imageUrl\":\"coffee.png\",\"status\":\"ACTIVE\"}]",
                 response.body()
         );
     }
 
     @Test
     void delegatesOrderCreation() {
-        var order = new Order(7L, 1L, 2, "PENDING");
+        var order = new Order(7L, 7L, 2, "PENDING");
         var response = client.toBlocking().exchange(
                 HttpRequest.POST("/api/v1/frontend/orders", order)
                         .contentType(MediaType.APPLICATION_JSON),
@@ -59,7 +60,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":7,\"productId\":1,\"quantity\":2,\"status\":\"PENDING\"}",
+                "{\"id\":7,\"cartId\":7,\"quantity\":2,\"status\":\"PENDING\"}",
                 response.body()
         );
     }
@@ -89,7 +90,7 @@ class FacadeTest {
 
     @Test
     void delegatesCartCreation() {
-        var cart = new Cart(8L, 1L, 2, "PENDING");
+        var cart = new Cart(8L, "PENDING");
         var response = client.toBlocking().exchange(
                 HttpRequest.POST("/api/v1/frontend/carts", cart)
                         .contentType(MediaType.APPLICATION_JSON),
@@ -98,7 +99,7 @@ class FacadeTest {
 
         assertEquals(HttpStatus.OK, response.getStatus());
         assertEquals(
-                "{\"id\":8,\"productId\":1,\"quantity\":2,\"status\":\"PENDING\"}",
+                "{\"id\":8,\"cartCreated\":null,\"cartConfirmed\":null,\"status\":\"PENDING\",\"items\":[]}",
                 response.body()
         );
     }
@@ -117,6 +118,8 @@ class FacadeTest {
     @Factory
     static class DownstreamClientMocks {
 
+        private final static Cart cart = new Cart(1L, "STATUS");
+
         @Singleton
         @Replaces(ProductServiceClient.class)
         ProductServiceClient productServiceClient() {
@@ -127,7 +130,7 @@ class FacadeTest {
                             1L,
                             "Coffee",
                             "Beans",
-                            new BigDecimal("9.99"),
+                            999L,
                             "coffee.png",
                             ProductStatus.ACTIVE
                     ));
@@ -170,7 +173,7 @@ class FacadeTest {
 
                 @Override
                 public Order getOrderById(Long id) {
-                    return new Order(id, 1L, 2, "PENDING");
+                    return new Order(id, 7L, 2, "PENDING");
                 }
 
                 @Override
@@ -180,12 +183,12 @@ class FacadeTest {
 
                 @Override
                 public Order cancelOrder(Long id) {
-                    return new Order(id, 1L, 2, "CANCELLED");
+                    return new Order(id, 7L, 2, "CANCELLED");
                 }
 
                 @Override
                 public Order payOrder(Long id) {
-                    return new Order(id, 1L, 2, "CONFIRMED");
+                    return new Order(id, 7L, 2, "CONFIRMED");
                 }
             };
         }
@@ -220,22 +223,27 @@ class FacadeTest {
 
                 @Override
                 public Cart getCartById(Long id) {
-                    return new Cart(id, 1L, 2, "PENDING");
+                    return new Cart(id, "PENDING");
                 }
 
                 @Override
-                public Cart addCart(Cart cart) {
+                public Cart saveCart(Cart cart) {
                     return cart;
                 }
 
                 @Override
                 public Cart cancelCart(Long id) {
-                    return new Cart(id, 1L, 2, "CANCELLED");
+                    return new Cart(id, "CANCELLED");
                 }
 
                 @Override
                 public Cart payCart(Long id) {
-                    return new Cart(id, 1L, 2, "CONFIRMED");
+                    return new Cart(id, "CONFIRMED");
+                }
+
+                @Override
+                public Cart create() {
+                    return cart;
                 }
             };
         }

@@ -14,9 +14,11 @@ public interface CartServiceClient {
 
     Cart getCartById(Long id);
 
-    Cart addCart(Cart cart);
+    Cart saveCart(Cart cart);
 
     Cart cancelCart(Long id);
 
     Cart payCart(Long id);
+
+    Cart create();
 }

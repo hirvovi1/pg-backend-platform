@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 public final class HealthCheckUtil {
@@ -22,11 +23,12 @@ public final class HealthCheckUtil {
     private static boolean pingHttp(String urlString) {
         try {
             LOG.debug("Pinging URL {}", urlString);
-            URL url = new URL(urlString);
+            URL url = URI.create(urlString).toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(1500);
             connection.setReadTimeout(1500);
+            //connection.setRequestProperty("boring.health.ping.request", "true");
             return connection.getResponseCode() == 200;
         } catch (IOException e) {
             LOG.error("Health check failed for URL {}", urlString, e);

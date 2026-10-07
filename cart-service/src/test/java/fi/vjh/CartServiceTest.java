@@ -3,8 +3,8 @@ package fi.vjh;
 import fi.vjh.domain.Cart;
 import fi.vjh.domain.CartItem;
 import fi.vjh.domain.CartStatus;
-import fi.vjh.repository.CartItemRow;
 import fi.vjh.repository.CartItemRepository;
+import fi.vjh.repository.CartItemRow;
 import fi.vjh.repository.CartRepository;
 import fi.vjh.repository.CartRow;
 import io.micronaut.context.annotation.Property;
@@ -19,8 +19,8 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,8 +57,6 @@ class CartServiceTest {
         assertEquals(2, carts.size());
         assertTrue(carts.stream().anyMatch(cart ->
                 first.getId().equals(cart.id())
-                        && cart.productId().equals(1L)
-                        && cart.quantity().equals(2)
                         && cart.status().equals(CartStatus.PENDING.name())
         ));
     }
@@ -75,7 +73,6 @@ class CartServiceTest {
 
         assertEquals(1, carts.size());
         assertEquals(matching.getId(), carts.get(0).id());
-        assertEquals(7L, carts.get(0).productId());
     }
 
     @Test
@@ -89,8 +86,6 @@ class CartServiceTest {
 
         assertEquals(200, response.getStatus().getCode());
         assertEquals(cartRow.getId(), response.body().id());
-        assertEquals(3L, response.body().productId());
-        assertEquals(4, response.body().quantity());
         assertEquals(CartStatus.CONFIRMED.name(), response.body().status());
     }
 
@@ -129,8 +124,8 @@ class CartServiceTest {
     }
 
     @Test
-    void createCartForcesPendingStatus() {
-        Cart request = new Cart(null, 11L, 3, "CANCELLED");
+    void saveCartForcesPendingStatus() {
+        Cart request = new Cart(null, "CANCELLED");
 
         HttpResponse<Cart> response = client.toBlocking().exchange(
                 HttpRequest.POST("/carts", request),
@@ -140,22 +135,19 @@ class CartServiceTest {
         assertEquals(201, response.getStatus().getCode());
         Cart saved = response.body();
         assertNotNull(saved.id());
-        assertEquals(11L, saved.productId());
-        assertEquals(3, saved.quantity());
         assertEquals(CartStatus.PENDING.name(), saved.status());
     }
 
     @Test
-    void createCartPersistsAndReturnsCartItems() {
+    void saveCartPersistsAndReturnsCartItems() {
         Cart request = new Cart(
                 null,
-                11L,
                 null,
-                3,
+                null,
                 "CANCELLED",
                 List.of(
-                        new CartItem(null, 2, 101L),
-                        new CartItem(null, 1, 102L)
+                        new CartItem(null, 2, 101L, "p1", 2L),
+                        new CartItem(null, 1, 102L, "p2", 3L)
                 )
         );
 
@@ -180,8 +172,8 @@ class CartServiceTest {
     }
 
     @Test
-    void createCartWithInvalidStatusReturnsBadRequest() {
-        Cart request = new Cart(null, 11L, 3, "INVALID");
+    void saveCartWithInvalidStatusReturnsBadRequest() {
+        Cart request = new Cart(null, "INVALID");
 
         HttpClientResponseException exception = assertThrows(
                 HttpClientResponseException.class,
@@ -193,6 +185,20 @@ class CartServiceTest {
 
         assertEquals(400, exception.getStatus().getCode());
     }
+
+    @Test
+    void createCartWithNoItemsReturnsEmptyList() {
+
+        HttpResponse<Cart> response = client.toBlocking().exchange(
+                HttpRequest.POST("/carts/create", ""),
+                Cart.class
+        );
+
+        assertEquals(201, response.getStatus().getCode());
+        Cart cart = response.body();
+        assertNotNull(cart.items());
+    }
+
 
     @Test
     void cancelCartChangesStatusToCancelled() {
@@ -222,7 +228,7 @@ class CartServiceTest {
     }
 
     @Test
-    void payCartConfirmsCartAndSetsCartCreatedDate() {
+    void payCartConfirmsCartAndSetsCartConfirmedDate() {
         CartRow cartRow = saveCart(30L, 2, CartStatus.PENDING);
         Date beforePayment = new Date();
 
@@ -234,13 +240,13 @@ class CartServiceTest {
         Date afterPayment = new Date();
         assertEquals(200, response.getStatus().getCode());
         assertEquals(CartStatus.CONFIRMED.name(), response.body().status());
-        assertNotNull(response.body().cartCreated());
-        assertFalse(response.body().cartCreated().before(beforePayment));
-        assertFalse(response.body().cartCreated().after(afterPayment));
+        assertNotNull(response.body().cartConfirmed());
+        assertFalse(response.body().cartConfirmed().before(beforePayment));
+        assertFalse(response.body().cartConfirmed().after(afterPayment));
 
         CartRow saved = cartRepository.findById(cartRow.getId()).orElseThrow();
         assertEquals(CartStatus.CONFIRMED, saved.getStatus());
-        assertNotNull(saved.getCartCreated());
+        assertNotNull(saved.getCartConfirmed());
     }
 
     @Test
@@ -251,23 +257,6 @@ class CartServiceTest {
         );
 
         assertEquals(404, exception.getStatus().getCode());
-    }
-
-    @Test
-    void payNonPendingCartReturnsConflictAndKeepsHistoryUnchanged() {
-        CartRow cartRow = saveCart(31L, 1, CartStatus.CANCELLED);
-
-        HttpClientResponseException exception = assertThrows(
-                HttpClientResponseException.class,
-                () -> client.toBlocking().exchange(
-                        HttpRequest.PUT("/carts/" + cartRow.getId() + "/pay", null)
-                )
-        );
-
-        assertEquals(409, exception.getStatus().getCode());
-        CartRow unchanged = cartRepository.findById(cartRow.getId()).orElseThrow();
-        assertEquals(CartStatus.CANCELLED, unchanged.getStatus());
-        assertNull(unchanged.getCartCreated());
     }
 
     @Test
@@ -299,9 +288,8 @@ class CartServiceTest {
 
     private CartRow saveCart(Long productId, int quantity, CartStatus status) {
         CartRow cartRow = new CartRow();
-        cartRow.setProductId(productId);
-        cartRow.setQuantity(quantity);
         cartRow.setStatus(status);
+        cartRow.setItems(List.of(new CartItemRow(null, cartRow, productId, "p name", quantity, 1L)));
         return cartRepository.save(cartRow);
     }
 

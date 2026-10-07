@@ -6,6 +6,8 @@ import io.micronaut.serde.annotation.Serdeable;
 public record CartItem(
         Long id,
         Integer itemCount,
-        Long productId
+        Long productId,
+        String productName,
+        Long priceInCents
 ) {
 }

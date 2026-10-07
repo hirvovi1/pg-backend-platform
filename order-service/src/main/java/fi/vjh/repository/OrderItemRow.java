@@ -1,17 +1,17 @@
 package fi.vjh.repository;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_items")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemRow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,6 @@ public class OrderItemRow {
     private Long productId;
     private int quantity;
 
-    private BigDecimal priceAtPurchase;
+    private Long priceAtPurchase;
 
 }

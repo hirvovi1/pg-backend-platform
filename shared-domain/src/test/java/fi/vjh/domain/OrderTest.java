@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
 
@@ -17,10 +15,10 @@ class OrderTest {
         OrderItem item = new OrderItem(10L, 2, 99L);
         List<OrderItem> items = List.of(item);
 
-        Order order = new Order(1L, 99L, orderPlaced, 2, "PENDING", items);
+        Order order = new Order(1L, 7L, orderPlaced, 2, "PENDING", items);
 
         assertEquals(1L, order.id());
-        assertEquals(99L, order.productId());
+        assertEquals(7L, order.cartId());
         assertSame(orderPlaced, order.orderPlaced());
         assertEquals(2, order.quantity());
         assertEquals("PENDING", order.status());
@@ -29,13 +27,13 @@ class OrderTest {
 
     @Test
     void legacyConstructorUsesEmptyItemsAndNoOrderDate() {
-        Order order = new Order(1L, 99L, 2, "PENDING");
+        Order order = new Order(1L, 7L, 2, "PENDING");
 
         assertEquals(1L, order.id());
-        assertEquals(99L, order.productId());
+        assertEquals(7L, order.cartId());
+        assertNull(order.orderPlaced());
         assertEquals(2, order.quantity());
         assertEquals("PENDING", order.status());
-        assertNull(order.orderPlaced());
         assertEquals(List.of(), order.items());
     }
 }
